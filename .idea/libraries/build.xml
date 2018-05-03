@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="build">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/jpf-annotations.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/jpf-classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/RunJPF.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/classloader_specific_tests.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/RunTest.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jpf-core/build/jpf.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

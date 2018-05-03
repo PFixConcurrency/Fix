@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="junit-4.10">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/heu_search/lib/junit-4.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/heu_search/lib/poi-3.17.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
