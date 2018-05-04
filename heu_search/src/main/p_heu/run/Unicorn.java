@@ -28,10 +28,10 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\myt\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -69,7 +69,7 @@ public class Unicorn {
         GenerateClass.compile(jars.toArray(new String[jars.size()]),
                 files.toArray(new String[files.size()]),
                 classpath);*/
-//        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
+        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
 
         return FixVerification.verifyByUnicorn(classpath);
 

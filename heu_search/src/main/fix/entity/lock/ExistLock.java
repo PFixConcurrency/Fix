@@ -38,4 +38,9 @@ public class ExistLock {
         this.startLine = startLine;
         this.endLine = endLine;
     }
+
+    public ExistLock(int startLine, int endLine) {
+        this.startLine = startLine;
+        this.endLine = endLine;
+    }
 }

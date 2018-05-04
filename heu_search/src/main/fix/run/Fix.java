@@ -54,9 +54,9 @@ public class Fix {
             /*while(!fixMethods.contains("成功")){
                 fix(FixType.iterateFix);
             }*/
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("select wrong pattern,please restart");
-        }finally {
+        } finally {
             endFixTime = System.currentTimeMillis();
             System.out.println("time for fixing:" + (endFixTime - startFixTime));
         }
@@ -253,17 +253,29 @@ public class Fix {
                 //先找找原来有没有锁
                 boolean varHasLock = false;//记录当前pattern是否加锁
                 ExistLock existLock = null;
+
+                int existGlobalLockStart = Integer.MAX_VALUE, existGlobalLockEnd = 0;
                 //判断它们有没有加锁，需要加何种锁，加锁位置
                 //对A的list分析
                 for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
-                    if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {//检查是否存在锁
-                        if (i == 1 && varHasLock == true) {//表示两个都有锁
-                            return;//直接结束
-                        } else {
-                            varHasLock = true;//有锁标为true
+                    //对于局部锁，先检查它是否已经被加锁
+                    if (type == AddSyncType.localSync) {
+                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {//检查是否存在锁
+                            if (i == 1 && varHasLock == true) {//表示两个都有锁
+                                return;//直接结束
+                            } else {
+                                varHasLock = true;//有锁标为true
+                                existLock = existLockName(rwnList.get(i));
+                            }
+                        }
+                    } else {
+                        //当长度为4，一致性错误时，即使原先变量被加锁，还是要加锁
+                        //存在锁
+                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {
                             existLock = existLockName(rwnList.get(i));
-//                            existLock = null;
+                            existGlobalLockStart = Math.min(existGlobalLockStart, existLock.getStartLine());
+                            existGlobalLockEnd = Math.max(existGlobalLockEnd, existLock.getEndLine());
                         }
                     }
                     //应该要加什么锁
@@ -315,6 +327,10 @@ public class Fix {
 
                     //两个地方都没有加锁
                     if (!varHasLock) {
+                        if (type == AddSyncType.globalStaticSync) {
+                            firstLoc = Math.min(firstLoc,existGlobalLockStart);
+                            lastLoc = Math.max(lastLoc, existGlobalLockEnd);
+                        }
                         //加锁
                         examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);
                     } else {//有加锁的，直接修改原有锁
@@ -420,7 +436,7 @@ public class Fix {
         }
 
         //关联变量处理
-        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//可优化
+        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//优化
 
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
