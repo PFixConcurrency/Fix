@@ -15,8 +15,8 @@
       <file leaf-file-name="Unicorn.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/heu_search/src/main/p_heu/run/Unicorn.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="620">
-              <caret line="72" lean-forward="true" selection-start-line="72" selection-end-line="72" />
+            <state relative-caret-position="554">
+              <caret line="54" column="31" lean-forward="true" selection-start-line="54" selection-start-column="31" selection-end-line="54" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -24,11 +24,20 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="GenerateClass.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/heu_search/src/main/p_heu/run/GenerateClass.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="343">
+              <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Fix.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/heu_search/src/main/fix/run/Fix.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="638">
-              <caret line="130" column="39" selection-start-line="130" selection-start-column="20" selection-end-line="130" selection-end-column="39" />
+            <state relative-caret-position="-616">
+              <caret line="106" column="55" lean-forward="true" selection-start-line="106" selection-start-column="55" selection-end-line="106" selection-end-column="55" />
               <folding>
                 <element signature="method#addSignal#0;class#Fix#0" />
               </folding>
@@ -137,7 +146,7 @@
       <find>ersonalAccount.java:11</find>
       <find>lockname</find>
       <find>add</find>
-      <find />
+      <find>this here</find>
       <find>修复</find>
       <find>1111</find>
       <find>lef</find>
@@ -147,7 +156,7 @@
       <find>得到</find>
       <find>pattern的</find>
       <find>pattern</find>
-      <find />
+      <find>existLock = existLockName(rwnList.get(i));</find>
     </findStrings>
     <replaceStrings>
       <replace>D:/Patch/lib/additionalJAR/lib/realLibb</replace>
@@ -244,56 +253,11 @@
             <path>
               <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="fix" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="fix" type="462c0819:PsiDirectoryNode" />
-              <item name="entity" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="fix" type="462c0819:PsiDirectoryNode" />
-              <item name="entity" type="462c0819:PsiDirectoryNode" />
-              <item name="type" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="fix" type="462c0819:PsiDirectoryNode" />
-              <item name="run" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="p_heu" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="p_heu" type="462c0819:PsiDirectoryNode" />
-              <item name="run" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="verify" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="verify" type="462c0819:PsiDirectoryNode" />
-              <item name="run" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -351,7 +315,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Fix">
+  <component name="RunManager" selected="Application.Unicorn">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
     </configuration>
@@ -473,8 +437,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Fix" />
         <item itemvalue="Application.Unicorn" />
+        <item itemvalue="Application.Fix" />
         <item itemvalue="Application.Test" />
         <item itemvalue="Application.UseSoot" />
         <item itemvalue="Application.Reminder" />
@@ -563,7 +527,7 @@
       <workItem from="1525332296874" duration="370000" />
       <workItem from="1525332759236" duration="1737000" />
       <workItem from="1525349305748" duration="273000" />
-      <workItem from="1525404226958" duration="5602000" />
+      <workItem from="1525404226958" duration="6331000" />
     </task>
     <servers />
   </component>
@@ -600,7 +564,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="440284000" />
+    <option name="totallyTimeSpent" value="441013000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -624,12 +588,12 @@
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5026652" side_tool="true" weight="0.8917749" />
       <window_info anchor="right" id="Maven Projects" order="4" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49733475" weight="0.6439394" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49733475" weight="0.6785714" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.60714287" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="3" />
-      <window_info content_ui="combo" id="Project" order="0" weight="0.1652452" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1652452" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32683983" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -648,7 +612,7 @@
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="6" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49733475" visible="true" weight="0.6439394" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49733475" visible="true" weight="0.4664502" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info content_ui="combo" id="Project" order="0" weight="0.1652452" />
@@ -920,13 +884,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/heu_search/src/main/p_heu/run/GenerateClass.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="22" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/heu_search/src/main/fix/Test.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
@@ -1026,10 +983,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/heu_search/src/main/p_heu/run/GenerateClass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="343">
+          <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/heu_search/src/main/fix/run/Fix.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="638">
-          <caret line="130" column="39" selection-start-line="130" selection-start-column="20" selection-end-line="130" selection-end-column="39" />
+        <state relative-caret-position="-616">
+          <caret line="106" column="55" lean-forward="true" selection-start-line="106" selection-start-column="55" selection-end-line="106" selection-end-column="55" />
           <folding>
             <element signature="method#addSignal#0;class#Fix#0" />
           </folding>
@@ -1038,8 +1002,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/heu_search/src/main/p_heu/run/Unicorn.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="620">
-          <caret line="72" lean-forward="true" selection-start-line="72" selection-end-line="72" />
+        <state relative-caret-position="554">
+          <caret line="54" column="31" lean-forward="true" selection-start-line="54" selection-start-column="31" selection-end-line="54" selection-end-column="31" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
