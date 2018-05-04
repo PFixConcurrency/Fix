@@ -2,6 +2,7 @@ package fix.run;
 
 import fix.entity.ImportPath;
 import fix.entity.MatchVariable;
+import fix.entity.type.RelevantVarLockLine;
 import fix.io.InsertCode;
 import org.eclipse.jdt.core.dom.*;
 
@@ -9,13 +10,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AddLockAfterAcquireVariable {
     static String dirPath = ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName;
     static Set<String> variableSet = new HashSet<String>();
     static String className = "";//类的名字，以后用来比较用
+    static List<RelevantVarLockLine> relevantVarLockLineList = new ArrayList<RelevantVarLockLine>();
 
     //chanage file content to buffer array
     public static char[] getFileContents(File file) {
@@ -99,8 +103,9 @@ public class AddLockAfterAcquireVariable {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
                     boolean flag = false;
                     int nodeStart = cu.getLineNumber(node.getStartPosition());
-                    int nodeEnd = cu.getLineNumber(node.getStartPosition() + node.getLength());
-                    if(!(nodeStart >= firstLoc && nodeStart <= lastLoc)){
+
+                    //不在原来的地方才要加锁
+                    if (!(nodeStart >= firstLoc && nodeStart <= lastLoc)) {
                         for (String s : variableSet) {
                             if (s.equals(node.getIdentifier()))
                                 flag = true;
@@ -127,13 +132,30 @@ public class AddLockAfterAcquireVariable {
 
                             //不能整个类加锁，变量不是在构造函数里
                             if (!(isMemberVariable(matchVariable)) && !(isConstruct(matchVariable.getSameFatherNode().getParent()))) {
-                                //加锁
-                                /*InsertCode.insert(cu.getLineNumber(matchVariable.getStartLine()), "ReentrantLock lock" + matchVariable.getLockNum() + " = new ReentrantLock(true);lock" + matchVariable.getLockNum() + ".lock();"
-                                        + " synchronized (lock" + matchVariable.getLockNum() + "){ ", filePath);*/
-                                InsertCode.insert(cu.getLineNumber(matchVariable.getStartLine()), "synchronized (" + lockName + "){ ", filePath);
-                                InsertCode.insert(cu.getLineNumber(matchVariable.getEndLine() + 1), " }", filePath);
-                                //更新锁
-                                matchVariable.update();
+                                boolean already = false;
+                                //没有数据直接加锁
+                                //有数据需要判定一下
+                                if (relevantVarLockLineList.size() != 0) {
+                                    for (RelevantVarLockLine rvl : relevantVarLockLineList) {
+                                        if (rvl.startLine == cu.getLineNumber(matchVariable.getStartLine()) &&
+                                                rvl.endLine == (cu.getLineNumber(matchVariable.getEndLine() + 1))) {
+                                            already = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!already) {
+                                    int start = cu.getLineNumber(matchVariable.getStartLine());
+                                    int end = cu.getLineNumber(matchVariable.getEndLine() + 1);
+                                    //加锁
+                                    InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
+                                    InsertCode.insert(end, " }", filePath);
+                                    //将数据放到list里面
+                                    RelevantVarLockLine r = new RelevantVarLockLine(start, end);
+                                    relevantVarLockLineList.add(r);
+                                }
+
+
                             }
                             //清空
                             matchVariable.clear();

@@ -156,7 +156,6 @@ public class Fix {
     //长度为2，先分情况
     private static void usePatternToDistinguish(Pattern patternCounter) {
 
-
         if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
@@ -421,7 +420,7 @@ public class Fix {
         }
 
         //关联变量处理
-        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//待定
+        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//可优化
 
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
