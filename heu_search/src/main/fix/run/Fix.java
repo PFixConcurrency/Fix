@@ -39,6 +39,8 @@ public class Fix {
     static long endUnicornTime = 0;
     static long startFixTime = 0;
     static long endFixTime = 0;
+    static String patternListTime = "";
+    static String fixTime = "";
 
     //全局静态变量
     static GlobalStaticObject globalStaticObject = GlobalStaticObject.getInstance();
@@ -46,24 +48,39 @@ public class Fix {
     //用于跨类修复
     static UseSoot useSoot = UseSoot.getInstance();
 
+    //当前修复到第几个
+    static int step = 0;
+
+    //第一次运行拿到的pattern
+    static List<Unicorn.PatternCounter> firstList = null;
+
+
     public static void main(String[] args) {
         startUnicornTime = System.currentTimeMillis();
+
         try {
             fix(FixType.firstFix);
-            //要测
-            /*while(!fixMethods.contains("成功")){
-                fix(FixType.iterateFix);
-            }*/
+//            //要测
+//            while(fixMethods.contains("fix fail")){
+//                step++;
+//                fix(FixType.iterateFix);
+//            }
         } catch (Exception e) {
-            System.out.println("select wrong pattern,please restart");
+            System.out.println("running error,please restart");
         } finally {
+
             endFixTime = System.currentTimeMillis();
-            System.out.println("time for fixing:" + (endFixTime - startFixTime));
+            fixTime = "time for fixing:" + (endFixTime - startFixTime);
+            //将修复方法写入文件中
+            InsertCode.writeLogFile(fixMethods + fixTime, "fix result");
         }
 
     }
 
     private static void fix(int type) {
+        if (step >= ImportPath.stopCount)
+            return;
+
         String verifyClasspath = ImportPath.verifyPath + "/generateClass";//要验证的class路径
 
         //处理包名有几层的情况
@@ -81,7 +98,8 @@ public class Fix {
         }
 
         //拿到最后一个元素
-        List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
+        List<Unicorn.PatternCounter> firstList = Unicorn.getPatternCounterList(sourceClassPath);
+
 
         //将长度为2的删除
         //实际上对，理论上考虑不全面
@@ -91,51 +109,77 @@ public class Fix {
         }*/
 
         endUnicornTime = System.currentTimeMillis();
-        System.out.println("time for getting pattern:" + (endUnicornTime - startUnicornTime));
+        patternListTime = "time for getting pattern list : " + (endUnicornTime - startUnicornTime);
 
-        //将所有的pattern打印出来，方便以后选择
-        System.out.println(tempList);
+        /*//将所有的pattern打印出来，方便以后选择
+        System.out.println(tempList);*/
 
-        System.out.println("if no correct pattern,please restart");
-        System.out.print("select correct pattern number(The bottom one is zero):");
+
+        //将所有pattern写入文件
+        InsertCode.writeLogFile(firstList.toString() + patternListTime, "pattern list");
+
+
+       /* System.out.println("if no correct pattern,please restart");
+        System.out.print("select correct pattern number(The bottom one is zero):");*/
+
+        /*
         //此处需要手动选择
         Scanner sc = new Scanner(System.in);
         int whichToUse = sc.nextInt();//使用第几个pattern
         //最下面那个是0，依次往上，因为当时排序的时候是倒着排的
-
+*/
         startFixTime = System.currentTimeMillis();
-        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);
+       /* int whichToUse = 0;
 
-        //根据pattern知道需要在哪个类中加锁
-        String position = patternCounter.getPattern().getNodes()[0].getPosition();
-        String[] tempSplit = position.split(":")[0].split("/");
-        whichCLassNeedSync = tempSplit[tempSplit.length - 1];
+        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);*/
 
-        addSyncFilePath = ImportPath.examplesRootPath + "/exportExamples/" + position.split(":")[0];
+        for (int i = 0; i < firstList.size(); i++) {
+            Unicorn.PatternCounter patternCounter = firstList.get(i);
+            System.out.println(firstList.get(i));
 
-        //将拿到的pattern写入文件中
-        InsertCode.writeLogFile(patternCounter.toString(), "pattern for fix");
+            //根据pattern知道需要在哪个类中加锁
+            String position = patternCounter.getPattern().getNodes()[0].getPosition();
+            String[] tempSplit = position.split(":")[0].split("/");
+            whichCLassNeedSync = tempSplit[tempSplit.length - 1];
 
-        //拿到该pattern对应的sequence
-        //第一次在失败运行中出现的sequence
-        RecordSequence.display(patternCounter.getFirstFailAppearPlace());
+            addSyncFilePath = ImportPath.examplesRootPath + "/exportExamples/" + position.split(":")[0];
 
-        //将sequence写入文件中
-        InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "sequence for fix");
+            //将拿到的pattern写入文件中
+            InsertCode.writeLogFile(patternCounter.toString(), "pattern for fix");
 
-        //对拷贝的项目进行修复
-        divideByLength(patternCounter);
 
-        //检测修复完的程序是否正确
-        fixMethods += "result:";
-        if (Unicorn.verifyFixSuccessful(verifyClasspath)) {
-            fixMethods += "fix success";
-        } else {
-            fixMethods += "fix fail";
+            //如果pattern在获取call graph或者没在失败中出现，会导致运行错误，则认为是错误的pattern，因为它提供了错误的位置
+            try {
+                //没有在失败中出现，就表明它跟错误没关系，直接跳过
+                if (patternCounter.getFirstFailAppearPlace() == null) {
+                    continue;
+                }
+                //拿到该pattern对应的sequence
+                //第一次在失败运行中出现的sequence
+                RecordSequence.display(patternCounter.getFirstFailAppearPlace());
+
+                //将sequence写入文件中
+//                InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "sequence for fix");
+
+                //对拷贝的项目进行修复
+                divideByLength(patternCounter);
+
+                //检测修复完的程序是否正确
+                fixMethods += "result : ";
+                if (Unicorn.verifyFixSuccessful(verifyClasspath)) {
+                    fixMethods += "fix success\n";
+                } else {
+                    fixMethods += "fix fail\n";
+                }
+            } catch (Exception e) {
+                System.out.println("Not this pattern");
+            }
+
+
+            if (fixMethods.contains("fix success")) {
+                break;
+            }
         }
-
-        //将修复方法写入文件中
-        InsertCode.writeLogFile(fixMethods, "fix method and result");
     }
 
     //根据pattern的长度执行不同的fix策略
@@ -158,11 +202,11 @@ public class Fix {
 
         if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
-            fixMethods += "添加信号量\n";
+            fixMethods += "Added Semaphore\n";
             addSignal(patternCounter);
         } else {
             //为长度为2的pattern添加同步,与3和4是不同的情况
-            fixMethods += "添加同步\n";
+            fixMethods += "Add synchronization\n";
             addSyncPatternOneToThree(patternCounter);
         }
     }
@@ -328,7 +372,7 @@ public class Fix {
                     //两个地方都没有加锁
                     if (!varHasLock) {
                         if (type == AddSyncType.globalStaticSync) {
-                            firstLoc = Math.min(firstLoc,existGlobalLockStart);
+                            firstLoc = Math.min(firstLoc, existGlobalLockStart);
                             lastLoc = Math.max(lastLoc, existGlobalLockEnd);
                         }
                         //加锁
@@ -440,7 +484,7 @@ public class Fix {
 
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
-            fixMethods += "对" + rwnList.get(0) + "加锁起止位置" + firstLoc + "->" + lastLoc + '\n';
+            fixMethods += "aim at : " + rwnList.get(0) + "Lock start and stop position : " + firstLoc + "->" + lastLoc + '\n';
         }
     }
 
@@ -484,7 +528,7 @@ public class Fix {
             result = "this";
         }
 
-        fixMethods += "锁的名字" + result.trim() + '\n';
+        fixMethods += "Lock Name : " + result.trim() + '\n';
         return result.trim();
     }
 
@@ -531,7 +575,7 @@ public class Fix {
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
 
-                    fixMethods += "加锁位置" + firstLoc + "->" + (lastLoc + 1) + '\n';
+                    fixMethods += "Locked position" + firstLoc + "->" + (lastLoc + 1) + '\n';
                     examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);//待定
                 }
             }
@@ -554,7 +598,7 @@ public class Fix {
                     //加锁
                     //检查是否存在锁再加锁
                     if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath, analyseJavaPath)) {
-                        fixMethods += "加锁位置" + Integer.parseInt(positionArg[1]) + '\n';
+                        fixMethods += "Locked position" + Integer.parseInt(positionArg[1]) + '\n';
                         //判断一下能不能用当前的锁直接进行修复
 
                         //判断加锁会不会和for循环等交叉
@@ -599,8 +643,8 @@ public class Fix {
             flagAssertLocation = Integer.parseInt(positionArg[1]) > flagAssertLocation ? Integer.parseInt(positionArg[1]) : flagAssertLocation;
         }
 
-        fixMethods += "信号量定义位置:" + flagDefineLocation + '\n';
-        fixMethods += "信号量使用位置:" + flagAssertLocation + '\n';
+        fixMethods += "The location of semaphore defines : " + flagDefineLocation + '\n';
+        fixMethods += "The location of semaphore use : " + flagAssertLocation + '\n';
 
         //构造函数不能加信号量
         if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, addSyncFilePath) &&

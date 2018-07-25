@@ -14,13 +14,15 @@ public class ImportPath {
 
     //具体到某个项目的包名称
 //    public static String projectName = "account";
-    public static String projectName = "reorder";
+    public static String projectName = "account2";
     //这个项目的主类名称
-    public static String mainClassName = "ReorderTest2";
+    public static String mainClassName = "Bank";
     //临时文件的目录，不用太在意，反正用完就删，但是要保证路径是对的
     public static String tempFile = "D:/Patch/temp.java";
     //验证程序的路径
     public static String verifyPath = examplesRootPath;
 
+    //修复多少次不成功停止
+    public static int stopCount = 5;
 
 }

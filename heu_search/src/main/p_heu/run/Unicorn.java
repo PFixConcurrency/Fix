@@ -28,10 +28,10 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\myt\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
-        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -133,7 +133,7 @@ public class Unicorn {
             public int compare(PatternCounter o1, PatternCounter o2) {
                 double r1 = (double) o1.getSuccessCount() / (o1.getSuccessCount() + o1.getFailCount());
                 double r2 = (double) o2.getSuccessCount() / (o2.getSuccessCount() + o2.getFailCount());
-                return -Double.compare(r1, r2) == 0 ?
+                return Double.compare(r1, r2) == 0 ?
                         Integer.compare(o1.getFailCount(), o2.getFailCount()) : -Double.compare(r1, r2);//changed
             }
         });
