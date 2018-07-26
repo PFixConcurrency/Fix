@@ -102,6 +102,7 @@ public class AddLockAfterAcquireVariable {
                 if (this.names.contains(node.getIdentifier())) {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
                     boolean flag = false;
+
                     int nodeStart = cu.getLineNumber(node.getStartPosition());
 
                     //不在原来的地方才要加锁
@@ -147,12 +148,15 @@ public class AddLockAfterAcquireVariable {
                                 if (!already) {
                                     int start = cu.getLineNumber(matchVariable.getStartLine());
                                     int end = cu.getLineNumber(matchVariable.getEndLine() + 1);
-                                    //加锁
-                                    InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
-                                    InsertCode.insert(end, " }", filePath);
-                                    //将数据放到list里面
-                                    RelevantVarLockLine r = new RelevantVarLockLine(start, end);
-                                    relevantVarLockLineList.add(r);
+                                    if (!(start >= firstLoc && start <= lastLoc) || (end >= firstLoc && end <= lastLoc)) {
+                                        //加锁
+                                        InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
+                                        InsertCode.insert(end, " }", filePath);
+
+                                        //将数据放到list里面
+                                        RelevantVarLockLine r = new RelevantVarLockLine(start, end);
+                                        relevantVarLockLineList.add(r);
+                                    }
                                 }
 
 

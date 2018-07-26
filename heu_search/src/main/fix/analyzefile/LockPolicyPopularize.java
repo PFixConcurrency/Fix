@@ -16,6 +16,11 @@ import java.util.Set;
 //就是关联变量加同步
 public class LockPolicyPopularize {
     static Set<String> relevantVariableSet = new HashSet<String>();
+    /*static int firstLoc = 0;
+    static int lastLoc = 0;
+    static String variableName = "";
+    static String lockName = "";*/
+
 
     public static void fixRelevantVar(int firstLoc, int lastLoc, String threadName, String className, String lockName, String filePath) {
         //获取到关联变量

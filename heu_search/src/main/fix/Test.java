@@ -22,6 +22,10 @@ public class Test {
         System.out.println(Fix.acquireLockName(node));*/
 
 //        String read = "tmp = new MyListNode(x, p._current._next);";
+        String field = "void getChars(int,int,char[],int)";
+        field = field.substring(0,field.indexOf("(")).substring(field.indexOf(" ") + 1);
+        System.out.println(field);
+
     }
 
 

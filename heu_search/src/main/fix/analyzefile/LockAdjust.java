@@ -225,7 +225,7 @@ public class LockAdjust {
 
                         //但是现在，在运行even程序的时候，发现将相邻的加锁两行合并才好
                         //所以改成了这样，直接删除
-                        int index = read.indexOf('{');//找到上个加锁的右括号
+                        int index = read.indexOf('}');//找到上个加锁的右括号
                         read = read.substring(index + 1);//直接把这部分都删了
                     }
                 }

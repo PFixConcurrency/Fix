@@ -28,11 +28,11 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\myt\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -69,9 +69,12 @@ public class Unicorn {
         GenerateClass.compile(jars.toArray(new String[jars.size()]),
                 files.toArray(new String[files.size()]),
                 classpath);*/
-        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
-
-        return FixVerification.verifyByUnicorn(classpath);
+        int status = GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
+        if (status == 0) {
+            return FixVerification.verifyByUnicorn(classpath);
+        } else {
+         return false;//没编译成功，直接算错
+        }
 
 
     }
@@ -134,7 +137,7 @@ public class Unicorn {
                 double r1 = (double) o1.getSuccessCount() / (o1.getSuccessCount() + o1.getFailCount());
                 double r2 = (double) o2.getSuccessCount() / (o2.getSuccessCount() + o2.getFailCount());
                 return Double.compare(r1, r2) == 0 ?
-                        Integer.compare(o1.getFailCount(), o2.getFailCount()) : -Double.compare(r1, r2);//changed
+                        Integer.compare(o1.getFailCount(), o2.getFailCount()) : Double.compare(r1, r2);//changed
             }
         });
     }

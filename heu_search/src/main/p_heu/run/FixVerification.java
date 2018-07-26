@@ -4,9 +4,6 @@ import fix.entity.ImportPath;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 import p_heu.entity.pattern.Pattern;
-import verify.entity.sequence.Sequence;
-import verify.listener.BasicPatternFindingListener;
-import verify.listener.SequenceProduceListener;
 
 import java.util.HashSet;
 import java.util.Set;

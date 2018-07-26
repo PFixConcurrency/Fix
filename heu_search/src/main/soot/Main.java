@@ -2,6 +2,7 @@ package soot;
 
 import analysis.CallSite;
 import analysis.Tools;
+import fix.entity.GlobalStaticObject;
 import fix.entity.ImportPath;
 import soot.structure.entity.CommonCaller;
 import soot.structure.entity.Method;
@@ -23,9 +24,12 @@ public class Main {
         Tools.getContainMethod(classpath, mainClass, classNameOne, classLineOne);
         CallSite left = Tools.containMethod;
         String left_sign = Tools.containMethod.getSignature();
+        //跨类搜索，记录方法名称
+        GlobalStaticObject.leftMethodName = left_sign.substring(0, left_sign.indexOf("(")).substring(left_sign.indexOf(" ") + 1);
         Tools.getContainMethod(classpath, mainClass, classNameTwo, classLineTwo);
         CallSite right = Tools.containMethod;
         String right_sign = Tools.containMethod.getSignature();
+        GlobalStaticObject.rightMethodName = right_sign.substring(0, right_sign.indexOf("(")).substring(right_sign.indexOf(" ") + 1);
 
         Set<CommonCaller> callers = callGraphBuild.findCommonCaller(new Method(left.getClassName(), left_sign), classLineOne,
                 new Method(right.getClassName(), right_sign), classLineTwo);

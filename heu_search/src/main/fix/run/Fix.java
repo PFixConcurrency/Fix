@@ -21,7 +21,8 @@ import java.util.regex.Matcher;
 
 public class Fix {
     static ExamplesIO examplesIO = ExamplesIO.getInstance();
-    static String dirPath = ImportPath.examplesRootPath + "/examples/" + ImportPath.projectName;//第一次修复的文件路径
+    static String firstDirPath = ImportPath.examplesRootPath + "/examples/" + ImportPath.projectName;//第一次修复的文件路径
+    static String dirPath = "";//第一次修复的文件路径
     //    static String dirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//第一次修复的文件路径
     static String iterateDirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//迭代修复的文件路径
 
@@ -48,11 +49,8 @@ public class Fix {
     //用于跨类修复
     static UseSoot useSoot = UseSoot.getInstance();
 
-    //当前修复到第几个
-    static int step = 0;
-
     //第一次运行拿到的pattern
-    static List<Unicorn.PatternCounter> firstList = null;
+//    static List<Unicorn.PatternCounter> firstList = null;
 
 
     public static void main(String[] args) {
@@ -78,26 +76,18 @@ public class Fix {
     }
 
     private static void fix(int type) {
-        if (step >= ImportPath.stopCount)
-            return;
+
 
         String verifyClasspath = ImportPath.verifyPath + "/generateClass";//要验证的class路径
 
         //处理包名有几层的情况
-        if (dirPath.contains(".")) {
-            dirPath = dirPath.replaceAll("\\.", "/");
+        if (firstDirPath.contains(".")) {
+            firstDirPath = firstDirPath.replaceAll("\\.", "/");
         }
 
-        if (type == FixType.firstFix) {
-            //先将项目拷贝到exportExamples
-            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
-            sourceClassPath = ImportPath.examplesRootPath + "/out/production/Patch";
-        } else if (type == FixType.iterateFix) {
-            dirPath = iterateDirPath;
-            sourceClassPath = ImportPath.verifyPath + "/generateClass";
-        }
+        sourceClassPath = ImportPath.examplesRootPath + "/out/production/Patch";
 
-        //拿到最后一个元素
+        //拿到pattern集合
         List<Unicorn.PatternCounter> firstList = Unicorn.getPatternCounterList(sourceClassPath);
 
 
@@ -111,31 +101,40 @@ public class Fix {
         endUnicornTime = System.currentTimeMillis();
         patternListTime = "time for getting pattern list : " + (endUnicornTime - startUnicornTime);
 
-        /*//将所有的pattern打印出来，方便以后选择
-        System.out.println(tempList);*/
+        //将所有的pattern打印出来，方便以后选择
+        System.out.println(firstList);
 
 
-        //将所有pattern写入文件
-        InsertCode.writeLogFile(firstList.toString() + patternListTime, "pattern list");
+        //将所有pattern写入文件0
+        InsertCode.writeLogFile(firstList.toString() + '\n' + patternListTime, "pattern list");
 
 
        /* System.out.println("if no correct pattern,please restart");
         System.out.print("select correct pattern number(The bottom one is zero):");*/
 
-        /*
         //此处需要手动选择
         Scanner sc = new Scanner(System.in);
         int whichToUse = sc.nextInt();//使用第几个pattern
-        //最下面那个是0，依次往上，因为当时排序的时候是倒着排的
-*/
+
         startFixTime = System.currentTimeMillis();
        /* int whichToUse = 0;
 
         Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);*/
 
-        for (int i = 0; i < firstList.size(); i++) {
-            Unicorn.PatternCounter patternCounter = firstList.get(i);
-            System.out.println(firstList.get(i));
+        int i = 0;
+//        while (i < firstList.size()) {
+        while (i < 1) {
+//            Unicorn.PatternCounter patternCounter = firstList.get(i);
+            Unicorn.PatternCounter patternCounter = firstList.get(whichToUse);
+            i++;
+            if (type == FixType.firstFix) {
+                //先将项目拷贝到exportExamples
+                dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", firstDirPath);
+
+            } else if (type == FixType.iterateFix) {
+                dirPath = iterateDirPath;
+                sourceClassPath = ImportPath.verifyPath + "/generateClass";
+            }
 
             //根据pattern知道需要在哪个类中加锁
             String position = patternCounter.getPattern().getNodes()[0].getPosition();
@@ -168,6 +167,7 @@ public class Fix {
                 fixMethods += "result : ";
                 if (Unicorn.verifyFixSuccessful(verifyClasspath)) {
                     fixMethods += "fix success\n";
+                    break;
                 } else {
                     fixMethods += "fix fail\n";
                 }
@@ -175,10 +175,6 @@ public class Fix {
                 System.out.println("Not this pattern");
             }
 
-
-            if (fixMethods.contains("fix success")) {
-                break;
-            }
         }
     }
 
@@ -258,7 +254,10 @@ public class Fix {
 
         //判断有几个变量，
         //如果有两个变量在不在一行
-        boolean flagTwoLine = false;
+        boolean flagInTwoLine = false;
+
+        //跨类修复时是否使用静态锁
+        boolean flagStaticLock = true;
 
         if (rwnList.size() > 1) {
             String oneField = rwnList.get(0).getField();
@@ -269,19 +268,19 @@ public class Fix {
 
             if (oneField.equals(twoField) && onePosition.equals(twoPosition)) {
                 //同一行的同一个变量。可以当成一行处理，加锁时不影响
-                flagTwoLine = false;
+                flagInTwoLine = false;
             } else {
-                flagTwoLine = true;
+                flagInTwoLine = true;
             }
         } else {//只有一个变量,
-            flagTwoLine = false;
+            flagInTwoLine = false;
         }
 
         //当前分析的是哪个文件？
         String analyseJavaPath = ImportPath.examplesRootPath + "/exportExamples/" + rwnList.get(0).getPosition().split(":")[0];
 
         //判断A中有几个变量
-        if (flagTwoLine) {//两个变量,且在两行
+        if (flagInTwoLine) {//两个变量,且在两行
             //如果有两个变量，需要分析
             //判断它们在不在一个函数中
             boolean flagSame;
@@ -325,7 +324,7 @@ public class Fix {
                     //应该要加什么锁
                     if (type == AddSyncType.localSync) {//需要添加局部锁
                         //这个步骤实际是用分析字符串来完成的
-                        //实际上是不对的
+                        //实际上是不严格的
                         lockName = acquireLockName(node, analyseJavaPath);
                     } else if (type == AddSyncType.globalStaticSync) {//需要添加全局锁
                         if (!globalStaticObject.isDefineObject) {
@@ -396,6 +395,13 @@ public class Fix {
                 //得到加锁位置
                 firstLoc = useSoot.getMinLine();
                 lastLoc = useSoot.getMaxLine();
+
+                String leftMethodName = whichObjectsFunction(firstLoc,GlobalStaticObject.leftMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                String rightMethodName = whichObjectsFunction(lastLoc,GlobalStaticObject.rightMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                //如果pattern定位到的变量是某个对象的变量，不加静态锁,根据stringbuffer受到启发
+                if(leftMethodName.equals(rightMethodName) && leftMethodName.length() > 0){
+                    flagStaticLock = false;
+                }
                 /*//如果pattern来自同一个类，那么跨类之后加的是this锁
                 String classNameOne = rwnList.get(0).getPosition().split("\\.")[0].replaceAll("/", ".");
                 String classNameTwo = rwnList.get(1).getPosition().split("\\.")[0].replaceAll("/", ".");
@@ -422,9 +428,15 @@ public class Fix {
                     lockLine = UseASTAnalysisClass.useASTAdjustThisLock(firstLoc, lastLoc, analyseJavaPath);
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
-
                     //暂定为都加静态锁，this锁不一定对
-                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                    //后来根据stringbuffer发现，加静态锁也不一定对，要考虑到底是哪个对象的变量
+                    if(flagStaticLock) {
+                        lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
+                    }else {
+                        lockName = leftMethodName;
+                    }
+
+                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                     lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
                 }
             }
@@ -479,12 +491,16 @@ public class Fix {
             lockAdjust.setTwoLastLoc(lastLoc + 1);
         }
 
-        //关联变量处理
-        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//优化
 
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
             fixMethods += "aim at : " + rwnList.get(0) + "Lock start and stop position : " + firstLoc + "->" + lastLoc + '\n';
+
+        }
+
+        //关联变量处理
+        if(lockName.equals("this") || lockName.equals("objectFix")){
+            LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//优化
         }
     }
 
@@ -539,6 +555,39 @@ public class Fix {
         return existLock;
     }
 
+    //获取方法属于哪个对象
+    public static String whichObjectsFunction(int targetLine, String methodName, String filePath) {
+        BufferedReader br = null;
+        String read = "";//用来读
+        String result = "";//用来处理
+        int line = 0;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+            while (((read = br.readLine()) != null)) {
+                line++;
+                if (line == targetLine) {//找到哪一行
+                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + methodName + ").*$");
+                    Matcher m = p.matcher(read);
+                    if (m.matches()) {
+                        result = m.group(1);
+                        int indexTemp = result.lastIndexOf('.');
+                        if (indexTemp == -1) {
+                            result = "";
+                        } else {
+                            result = result.substring(0, indexTemp);
+                        }
+                    } else {
+                        result = "";
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result.trim();
+    }
 
     //对长度为2的pattern添加同步
     private static void addSyncPatternOneToThree(Pattern patternCounter) {
@@ -560,7 +609,7 @@ public class Fix {
             int twoLoc = Integer.parseInt(patternCounter.getNodes()[1].getPosition().split(":")[1]);
             firstLoc = Math.min(oneLoc, twoLoc);
             lastLoc = Math.max(oneLoc, twoLoc);
-            String lockName = acquireLockName(patternCounter.getNodes()[0], patternCounter.getNodes()[0].getPosition().split(":")[0]);
+            String lockName = acquireLockName(patternCounter.getNodes()[0], analyseJavaPath);
             if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, analyseJavaPath)) {
                 //加锁
                 //检查是否存在锁再加锁
@@ -575,7 +624,12 @@ public class Fix {
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
 
-                    fixMethods += "Locked position" + firstLoc + "->" + (lastLoc + 1) + '\n';
+                    fixMethods += "Locked position : " + firstLoc + "->" + (lastLoc + 1) + '\n';
+                    //根据wronglock2来的启发，都在run()里面需要全局静态锁
+                    if (UseASTAnalysisClass.checkInRun(firstLoc,lastLoc,analyseJavaPath)) {
+                        lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
+//                        System.out.println(lockName);
+                    }
                     examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);//待定
                 }
             }

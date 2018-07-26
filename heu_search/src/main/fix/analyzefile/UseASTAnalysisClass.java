@@ -1,5 +1,6 @@
 package fix.analyzefile;
 
+import fix.entity.ImportPath;
 import fix.entity.lock.ExistLock;
 import fix.io.ExamplesIO;
 import org.eclipse.jdt.core.dom.*;
@@ -30,6 +31,7 @@ public class UseASTAnalysisClass {
 
     private static String objectName;//加的静态变量的名称
 
+    static boolean flagInRun = false;
 
 
     public static void main(String[] args) {
@@ -49,9 +51,11 @@ public class UseASTAnalysisClass {
         System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
 //        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
 //        System.out.println(useASTCheckWhetherLock(42, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
-        lockLine = useASTCheckVariableInLock(444, 448, "D:/Patch/examples/stringbuffer/StringBuffer.java");
+
+        /*lockLine = useASTCheckVariableInLock(444, 448, "D:/Patch/examples/stringbuffer/StringBuffer.java");
         System.out.println(lockLine.getFirstLoc());
-        System.out.println(lockLine.getLastLoc());
+        System.out.println(lockLine.getLastLoc());*/
+        System.out.println(UseASTAnalysisClass.checkInRun(29, 30, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\wronglock2\\Main.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -110,7 +114,7 @@ public class UseASTAnalysisClass {
             public boolean visit(SimpleName node) {
                 if (cu.getLineNumber(node.getStartPosition()) > locEnd && cu.getLineNumber(node.getStartPosition() + node.getLength()) <= this.functionEnd) {
                     if (this.varDefInSync.contains(node.getIdentifier())) {
-                       lockLine.setLastLoc(cu.getLineNumber(node.getStartPosition() + node.getLength()));
+                        lockLine.setLastLoc(cu.getLineNumber(node.getStartPosition() + node.getLength()));
                     }
                 }
                 return super.visit(node);
@@ -137,13 +141,13 @@ public class UseASTAnalysisClass {
 
                 boolean flagCross = true;
                 //先找不交叉的情况
-                if(firstLoc > end || lastLoc < start){
+                if (firstLoc > end || lastLoc < start) {
                     flagCross = false;
                 }
                 //交叉需要改变行数
                 if (flagCross) {
-                    lockLine.setFirstLoc(Math.min(firstLoc,start));
-                    lockLine.setLastLoc(Math.max(lastLoc,end));
+                    lockLine.setFirstLoc(Math.min(firstLoc, start));
+                    lockLine.setLastLoc(Math.max(lastLoc, end));
                 }
                 return super.visit(node);
             }
@@ -181,7 +185,7 @@ public class UseASTAnalysisClass {
         }
         ExamplesIO examplesIO = ExamplesIO.getInstance();
         objectName = "objectFix";
-        examplesIO.addStaticObject(index + 1, objectName, filePath);
+        examplesIO.addStaticObject(index + 2, objectName, filePath);
 
         /*ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -426,6 +430,35 @@ public class UseASTAnalysisClass {
             node = node.getParent();
         }
         return false;
+    }
+
+    public static boolean checkInRun(int firstLoc, int lastLoc, String filepath) {
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filepath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+
+        cu.accept(new ASTVisitor() {
+
+            @Override
+            public boolean visit(MethodDeclaration node) {
+
+                if (node.getName().toString().equals("run")) {
+                    int start = cu.getLineNumber(node.getStartPosition());
+                    int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
+                    if((firstLoc >= start && firstLoc <= end) && (lastLoc >= start && lastLoc <= end)){
+                        flagInRun = true;
+                    }else {
+                        flagInRun =false;
+                    }
+                }
+                return super.visit(node);
+            }
+
+        });
+        return flagInRun;
     }
 
     //表示加锁行数
