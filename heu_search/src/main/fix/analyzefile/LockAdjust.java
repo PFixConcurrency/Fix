@@ -144,6 +144,9 @@ public class LockAdjust {
                     adjustOldSync(filePath, 0);//0表示合并锁，1表示移动锁
                 }
             }
+            LockPolicyPopularize.firstLoc = finalFirstLoc;
+            LockPolicyPopularize.lastLoc = finalLastLoc;
+            LockPolicyPopularize.lockName = oneLockName;
 //        }
     }
 

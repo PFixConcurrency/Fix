@@ -68,12 +68,12 @@ public class UseSoot {
 
         int classLineTwo = Integer.parseInt(position.split(":")[1]);
 
-        System.out.println(classNameOne + "," + classLineOne + "," + classNameTwo + "," + classLineTwo);
+//        System.out.println(classNameOne + "," + classLineOne + "," + classNameTwo + "," + classLineTwo);
 //        System.exit(-1);
         //利用soot得到调用图
         Set<CommonCaller> callGraphInfo = Main.getCallGraphInfo(classNameOne, classLineOne, classNameTwo, classLineTwo);
 
-        System.out.println(callGraphInfo);
+//        System.out.println(callGraphInfo);
 //        System.exit(-1);
 
         for (CommonCaller caller : callGraphInfo) {

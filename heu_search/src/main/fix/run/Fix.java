@@ -234,12 +234,17 @@ public class Fix {
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
+            //关联变量处理
+            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
+
         } else if (patternCounter.getNodes().length == 4) {//长度为4加静态锁？
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.globalStaticSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.globalStaticSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
+            //关联变量处理
+            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
         }
 
     }
@@ -396,10 +401,10 @@ public class Fix {
                 firstLoc = useSoot.getMinLine();
                 lastLoc = useSoot.getMaxLine();
 
-                String leftMethodName = whichObjectsFunction(firstLoc,GlobalStaticObject.leftMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-                String rightMethodName = whichObjectsFunction(lastLoc,GlobalStaticObject.rightMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                String leftMethodName = whichObjectsFunction(firstLoc, GlobalStaticObject.leftMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                String rightMethodName = whichObjectsFunction(lastLoc, GlobalStaticObject.rightMethodName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                 //如果pattern定位到的变量是某个对象的变量，不加静态锁,根据stringbuffer受到启发
-                if(leftMethodName.equals(rightMethodName) && leftMethodName.length() > 0){
+                if (leftMethodName.equals(rightMethodName) && leftMethodName.length() > 0) {
                     flagStaticLock = false;
                 }
                 /*//如果pattern来自同一个类，那么跨类之后加的是this锁
@@ -430,9 +435,9 @@ public class Fix {
                     lastLoc = lockLine.getLastLoc();
                     //暂定为都加静态锁，this锁不一定对
                     //后来根据stringbuffer发现，加静态锁也不一定对，要考虑到底是哪个对象的变量
-                    if(flagStaticLock) {
+                    if (flagStaticLock) {
                         lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
-                    }else {
+                    } else {
                         lockName = leftMethodName;
                     }
 
@@ -498,10 +503,7 @@ public class Fix {
 
         }
 
-        //关联变量处理
-        if(lockName.equals("this") || lockName.equals("objectFix")){
-            LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//优化
-        }
+
     }
 
     //读到那一行，然后对字符串处理
@@ -626,7 +628,7 @@ public class Fix {
 
                     fixMethods += "Locked position : " + firstLoc + "->" + (lastLoc + 1) + '\n';
                     //根据wronglock2来的启发，都在run()里面需要全局静态锁
-                    if (UseASTAnalysisClass.checkInRun(firstLoc,lastLoc,analyseJavaPath)) {
+                    if (UseASTAnalysisClass.checkInRun(firstLoc, lastLoc, analyseJavaPath)) {
                         lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
 //                        System.out.println(lockName);
                     }
