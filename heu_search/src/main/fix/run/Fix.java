@@ -179,7 +179,7 @@ public class Fix {
     }
 
     //根据pattern的长度执行不同的fix策略
-    private static void divideByLength(Unicorn.PatternCounter patternCounter) {
+    private static void divideByLength(Unicorn.PatternCounter patternCounter) throws Exception {
         int length = patternCounter.getPattern().getNodes().length;
         if (length == 2) {
             fixMethods += "Fix one\n";
@@ -194,10 +194,10 @@ public class Fix {
     }
 
     //长度为2，先分情况
-    private static void usePatternToDistinguish(Pattern patternCounter) {
+    private static void usePatternToDistinguish (Pattern patternCounter) throws Exception{
 
         if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
-            //为长度为2的pattern添加同步
+            //为长度为2的pattern添加信号量
             fixMethods += "Added Semaphore\n";
             addSignal(patternCounter);
         } else {
@@ -208,7 +208,7 @@ public class Fix {
     }
 
     //长度为3或4，添加同步
-    private static void usePatternToAddSync(Pattern patternCounter) {
+    private static void usePatternToAddSync(Pattern patternCounter) throws Exception{
         //根据线程将三个结点分为两个list
         List<ReadWriteNode> threadA = new ArrayList<ReadWriteNode>();//线程A的结点
         List<ReadWriteNode> threadB = new ArrayList<ReadWriteNode>();//线程B的结点
@@ -250,7 +250,7 @@ public class Fix {
     }
 
     //对一个线程中的node进行加锁
-    private static void addSynchronized(List<ReadWriteNode> rwnList, int type) {
+    private static void addSynchronized(List<ReadWriteNode> rwnList, int type) throws Exception{
         int firstLoc = 0, lastLoc = 0;
 
         String lockName = "";//用来表示加锁的名称
@@ -508,7 +508,7 @@ public class Fix {
 
     //读到那一行，然后对字符串处理
     //获取锁的名称
-    public static String acquireLockName(ReadWriteNode node, String filePath) {
+    public static String acquireLockName(ReadWriteNode node, String filePath) throws Exception{
         BufferedReader br = null;
         String read = "";//用来读
         String result = "";//用来处理
@@ -551,14 +551,14 @@ public class Fix {
     }
 
     //输出锁的名称
-    private static ExistLock existLockName(ReadWriteNode node) {
+    private static ExistLock existLockName(ReadWriteNode node) throws Exception{
         ExistLock existLock = UseASTAnalysisClass.useASTCFindLockLine(node, addSyncFilePath);
         existLock = AcquireSyncName.acquireSync(existLock, addSyncFilePath);
         return existLock;
     }
 
     //获取方法属于哪个对象
-    public static String whichObjectsFunction(int targetLine, String methodName, String filePath) {
+    public static String whichObjectsFunction(int targetLine, String methodName, String filePath) throws Exception{
         BufferedReader br = null;
         String read = "";//用来读
         String result = "";//用来处理
@@ -592,7 +592,7 @@ public class Fix {
     }
 
     //对长度为2的pattern添加同步
-    private static void addSyncPatternOneToThree(Pattern patternCounter) {
+    private static void addSyncPatternOneToThree(Pattern patternCounter) throws Exception{
 
         int firstLoc = 0, lastLoc = 0;
 
@@ -633,6 +633,10 @@ public class Fix {
 //                        System.out.println(lockName);
                     }
                     examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);//待定
+                    LockPolicyPopularize.firstLoc = firstLoc;
+                    LockPolicyPopularize.lastLoc = lastLoc;
+                    LockPolicyPopularize.lockName = lockName;
+                    LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
                 }
             }
         } else {
@@ -681,6 +685,7 @@ public class Fix {
                         examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);//待定
 
                         lockAdjust.adjust(analyseJavaPath);
+                        LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
                     }
                 }
             }
@@ -688,7 +693,7 @@ public class Fix {
     }
 
     //添加信号量修复顺序违背
-    private static void addSignal(Pattern patternCounter) {
+    private static void addSignal(Pattern patternCounter) throws Exception{
         //得到pattern中较小的行数
         int flagDefineLocation = Integer.MAX_VALUE;//flag应该在哪行定义
         int flagAssertLocation = Integer.MIN_VALUE;//flag应该在那行判断
