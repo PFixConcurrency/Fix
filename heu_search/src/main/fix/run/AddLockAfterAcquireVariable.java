@@ -1,5 +1,6 @@
 package fix.run;
 
+import fix.analyzefile.LockPolicyPopularize;
 import fix.entity.ImportPath;
 import fix.entity.MatchVariable;
 import fix.entity.type.RelevantVarLockLine;

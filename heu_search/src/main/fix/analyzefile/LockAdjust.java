@@ -132,6 +132,7 @@ public class LockAdjust {
     }
 
     public void adjust(String filePath) {
+//        System.out.println(oneFirstLoc + "," + oneLastLoc + "," + twoFirstLoc +"," + twoLastLoc + cross() +  "=================================");
         //后来我仔细想了想，不管锁是不是相同都要合并
         //只有在同一个文件里面加锁才能合并，都不同类了也不需要合并了
             if (cross() && oneLockFile.equals(twoLockFile)) {//如果交叉需要合并
@@ -143,10 +144,11 @@ public class LockAdjust {
                     //删除原有锁，然后添加新的合并锁
                     adjustOldSync(filePath, 0);//0表示合并锁，1表示移动锁
                 }
+                LockPolicyPopularize.firstLoc = finalFirstLoc;
+                LockPolicyPopularize.lastLoc = finalLastLoc;
+                LockPolicyPopularize.lockName = oneLockName;
+                LockPolicyPopularize.flagCross = true;
             }
-            LockPolicyPopularize.firstLoc = finalFirstLoc;
-            LockPolicyPopularize.lastLoc = finalLastLoc;
-            LockPolicyPopularize.lockName = oneLockName;
 //        }
     }
 
@@ -228,6 +230,8 @@ public class LockAdjust {
 
                         //但是现在，在运行even程序的时候，发现将相邻的加锁两行合并才好
                         //所以改成了这样，直接删除
+                        String syncStr = "synchronized (" + oneLockName + "){ ";
+                        read = read.replace(syncStr, "");
                         int index = read.indexOf('}');//找到上个加锁的右括号
                         read = read.substring(index + 1);//直接把这部分都删了
                     }

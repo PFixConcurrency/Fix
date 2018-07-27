@@ -20,6 +20,7 @@ public class LockPolicyPopularize {
     public static int lastLoc = 0;
     public static String variableName = "";
     public static String lockName = "";
+    public static boolean flagCross = false;//代表是否合并
 
 
     public static void fixRelevantVar(String filePath) {

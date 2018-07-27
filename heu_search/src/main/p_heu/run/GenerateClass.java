@@ -32,7 +32,7 @@ public class GenerateClass {
         if(dirPath.contains(".")){
             dirPath = dirPath.replaceAll("\\.","/");
         }
-        System.out.println(dirPath);
+//        System.out.println(dirPath);
         List<String> localFileList = new ArrayList<String>();
         localFileList = getAllJavaFile(dirPath);
 

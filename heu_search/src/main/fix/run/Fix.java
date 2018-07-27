@@ -104,8 +104,7 @@ public class Fix {
         //将所有的pattern打印出来，方便以后选择
         System.out.println(firstList);
 
-
-        //将所有pattern写入文件0
+        //将所有pattern写入文件
         InsertCode.writeLogFile(firstList.toString() + '\n' + patternListTime, "pattern list");
 
 
@@ -194,7 +193,7 @@ public class Fix {
     }
 
     //长度为2，先分情况
-    private static void usePatternToDistinguish (Pattern patternCounter) throws Exception{
+    private static void usePatternToDistinguish(Pattern patternCounter) throws Exception {
 
         if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加信号量
@@ -208,7 +207,7 @@ public class Fix {
     }
 
     //长度为3或4，添加同步
-    private static void usePatternToAddSync(Pattern patternCounter) throws Exception{
+    private static void usePatternToAddSync(Pattern patternCounter) throws Exception {
         //根据线程将三个结点分为两个list
         List<ReadWriteNode> threadA = new ArrayList<ReadWriteNode>();//线程A的结点
         List<ReadWriteNode> threadB = new ArrayList<ReadWriteNode>();//线程B的结点
@@ -234,23 +233,29 @@ public class Fix {
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
-            //关联变量处理
-            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
-
-        } else if (patternCounter.getNodes().length == 4) {//长度为4加静态锁？
+        } else if (patternCounter.getNodes().length == 4) {//长度为4,有时候要加静态全局锁
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.globalStaticSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.globalStaticSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
-            //关联变量处理
-            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
         }
 
+        //关联变量处理
+        if (LockPolicyPopularize.flagCross) {
+            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
+        } else {
+            LockPolicyPopularize.firstLoc = lockAdjust.getOneFirstLoc();
+            LockPolicyPopularize.lastLoc = lockAdjust.getOneLastLoc();
+            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
+            LockPolicyPopularize.firstLoc = lockAdjust.getTwoFirstLoc();
+            LockPolicyPopularize.lastLoc = lockAdjust.getTwoLastLoc();
+            LockPolicyPopularize.fixRelevantVar(addSyncFilePath);
+        }
     }
 
     //对一个线程中的node进行加锁
-    private static void addSynchronized(List<ReadWriteNode> rwnList, int type) throws Exception{
+    private static void addSynchronized(List<ReadWriteNode> rwnList, int type) throws Exception {
         int firstLoc = 0, lastLoc = 0;
 
         String lockName = "";//用来表示加锁的名称
@@ -329,7 +334,7 @@ public class Fix {
                     //应该要加什么锁
                     if (type == AddSyncType.localSync) {//需要添加局部锁
                         //这个步骤实际是用分析字符串来完成的
-                        //实际上是不严格的
+                        //可优化
                         lockName = acquireLockName(node, analyseJavaPath);
                     } else if (type == AddSyncType.globalStaticSync) {//需要添加全局锁
                         if (!globalStaticObject.isDefineObject) {
@@ -508,38 +513,34 @@ public class Fix {
 
     //读到那一行，然后对字符串处理
     //获取锁的名称
-    public static String acquireLockName(ReadWriteNode node, String filePath) throws Exception{
+    public static String acquireLockName(ReadWriteNode node, String filePath) throws Exception {
         BufferedReader br = null;
         String read = "";//用来读
         String result = "";//用来处理
         int line = 0;
         int poi = Integer.parseInt(node.getPosition().split(":")[1]);
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
-            while (((read = br.readLine()) != null)) {
-                line++;
-                if (line == poi) {//找到哪一行
-                    String field = node.getField();//得的变量
-                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + field + ").*$");
-                    Matcher m = p.matcher(read);
-                    if (m.matches()) {
-                        result = m.group(1);
-                        int indexTemp = result.lastIndexOf('.');
-                        if (indexTemp == -1) {
-                            result = "this";
-                        } else {
-                            result = result.substring(0, indexTemp);
-                        }
-                    } else {
+
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+        while (((read = br.readLine()) != null)) {
+            line++;
+            if (line == poi) {//找到哪一行
+                String field = node.getField();//得的变量
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + field + ").*$");
+                Matcher m = p.matcher(read);
+                if (m.matches()) {
+                    result = m.group(1);
+                    int indexTemp = result.lastIndexOf('.');
+                    if (indexTemp == -1) {
                         result = "this";
+                    } else {
+                        result = result.substring(0, indexTemp);
                     }
+                } else {
+                    result = "this";
                 }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
         //如果是类的static变量，直接加this锁？？
         //认为如果不含有@符号就是静态变量
         if (!node.getElement().contains("@")) {
@@ -551,48 +552,44 @@ public class Fix {
     }
 
     //输出锁的名称
-    private static ExistLock existLockName(ReadWriteNode node) throws Exception{
+    private static ExistLock existLockName(ReadWriteNode node) throws Exception {
         ExistLock existLock = UseASTAnalysisClass.useASTCFindLockLine(node, addSyncFilePath);
         existLock = AcquireSyncName.acquireSync(existLock, addSyncFilePath);
         return existLock;
     }
 
     //获取方法属于哪个对象
-    public static String whichObjectsFunction(int targetLine, String methodName, String filePath) throws Exception{
+    public static String whichObjectsFunction(int targetLine, String methodName, String filePath) throws Exception {
         BufferedReader br = null;
         String read = "";//用来读
         String result = "";//用来处理
         int line = 0;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
-            while (((read = br.readLine()) != null)) {
-                line++;
-                if (line == targetLine) {//找到哪一行
-                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + methodName + ").*$");
-                    Matcher m = p.matcher(read);
-                    if (m.matches()) {
-                        result = m.group(1);
-                        int indexTemp = result.lastIndexOf('.');
-                        if (indexTemp == -1) {
-                            result = "";
-                        } else {
-                            result = result.substring(0, indexTemp);
-                        }
-                    } else {
+
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+        while (((read = br.readLine()) != null)) {
+            line++;
+            if (line == targetLine) {//找到哪一行
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + methodName + ").*$");
+                Matcher m = p.matcher(read);
+                if (m.matches()) {
+                    result = m.group(1);
+                    int indexTemp = result.lastIndexOf('.');
+                    if (indexTemp == -1) {
                         result = "";
+                    } else {
+                        result = result.substring(0, indexTemp);
                     }
+                } else {
+                    result = "";
                 }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
         return result.trim();
     }
 
     //对长度为2的pattern添加同步
-    private static void addSyncPatternOneToThree(Pattern patternCounter) throws Exception{
+    private static void addSyncPatternOneToThree(Pattern patternCounter) throws Exception {
 
         int firstLoc = 0, lastLoc = 0;
 
@@ -693,7 +690,7 @@ public class Fix {
     }
 
     //添加信号量修复顺序违背
-    private static void addSignal(Pattern patternCounter) throws Exception{
+    private static void addSignal(Pattern patternCounter) throws Exception {
         //得到pattern中较小的行数
         int flagDefineLocation = Integer.MAX_VALUE;//flag应该在哪行定义
         int flagAssertLocation = Integer.MIN_VALUE;//flag应该在那行判断
