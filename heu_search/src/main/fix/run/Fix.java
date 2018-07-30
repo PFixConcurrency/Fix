@@ -241,7 +241,6 @@ public class Fix {
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
         } else if (patternCounter.getNodes().length == 4) {//长度为4,有时候要加静态全局锁
-            /*//是否如此区分？？？
             boolean flagSame1 = UseASTAnalysisClass.assertSameFunction(threadA, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
             boolean flagSame2 = UseASTAnalysisClass.assertSameFunction(threadB, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
 //            System.out.println("判断结果" + flagSame1 + "," + flagSame2);
@@ -251,9 +250,9 @@ public class Fix {
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.globalStaticSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
-            }else {*/
+            }else {
                 addSynchronizedOfFourLengthPattern(patternCounter.getNodes());
-//            }
+            }
         }
 
         //关联变量处理
@@ -331,7 +330,7 @@ public class Fix {
                     //对于局部锁，先检查它是否已经被加锁
                     if (type == AddSyncType.localSync) {
                         if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {//检查是否存在锁
-                            if (i == 1 && varHasLock == true) {//表示两个都有锁，因为，长度为3不会有这样的情况，长度为4，另外处理了
+                            if (i == 1 && varHasLock == true) {//表示两个都有锁
                                 return;//直接结束
                             } else {
                                 varHasLock = true;//有锁标为true
