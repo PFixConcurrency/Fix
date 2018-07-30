@@ -1,5 +1,5 @@
-<BuggyProgram,
-User (0) generated 985, presented 985, and recorded 985
-User (1) generated 985, presented 985, and recorded 985
-User (2) generated 985, presented 985, and recorded 985, 
-None>
+In this file you will find the number of the bug appearances accordingly to the number of threads that the bugged program utilized with:
+
+Few Threads: 
+
+Number Of Threads: 4 Number Of Bugs: 

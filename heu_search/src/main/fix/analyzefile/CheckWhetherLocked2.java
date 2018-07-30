@@ -6,14 +6,14 @@ import fix.listener.LockListener2;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 
-public class CheckWhetherLocked {
+public class CheckWhetherLocked2 {
 
-    static boolean flagUseJPFCheckWhetherLock = false;//ç”¨jpfæ£€æµ‹æ˜¯å¦è¢«åŠ é”
+    static boolean flagUseJPFCheckWhetherLock = false;//ÓÃjpf¼ì²âÊÇ·ñ±»¼ÓËø
 
-    //è¦å¯»æ‰¾çš„å˜é‡çš„ä½ç½®,å½¢å¼å¿…é¡»æ˜¯   åŒ…å/javaæ–‡ä»¶ï¼šè¡Œæ•°1
+    //ÒªÑ°ÕÒµÄ±äÁ¿µÄÎ»ÖÃ,ĞÎÊ½±ØĞëÊÇ   °üÃû/javaÎÄ¼ş£ºĞĞÊı1
     //"account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("reorder/SetCheck2.java:15","a", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
+        System.out.println(check("test/Test.java:13","a", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
 //        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
     public static boolean check(String variableLoc, String variableName, String classpath, String javaFilePath) {
@@ -25,21 +25,21 @@ public class CheckWhetherLocked {
         };
         Config config = new Config(str);
         JPF jpf = new JPF(config);
-        CheckWhetherLockedListener checkWhetherLockedListener = new CheckWhetherLockedListener(ImportPath.examplesRootPath + "\\examples\\lock.txt", variableName, variableLoc);
-//        LockListener2 checkWhetherLockedListener = new LockListener2(ImportPath.examplesRootPath + "\\examples\\lock.txt", variableName, variableLoc);
+//        CheckWhetherLockedListener checkWhetherLockedListener = new CheckWhetherLockedListener(ImportPath.examplesRootPath + "\\examples\\lock.txt", variableName, variableLoc);
+        LockListener2 checkWhetherLockedListener = new LockListener2(ImportPath.examplesRootPath + "\\examples\\lock.txt", variableName, variableLoc);
         jpf.addListener(checkWhetherLockedListener);
 //        LockListener lockListener = new LockListener(ImportPath.examplesRootPath + "\\examples\\lock.txt","test");
 //        jpf.addListener(lockListener);
         jpf.run();
 //        System.out.println(checkWhetherLockedListener.isCheckFlag());
         flagUseJPFCheckWhetherLock = checkWhetherLockedListener.isCheckFlag();
-        //ä¸€ä¸ªéœ€è¦å¯¹clasæ–‡ä»¶å¤„ç†
-        //ä¸€ä¸ªå¯¹javaæ–‡ä»¶å¤„ç†
-        //å› ä¸ºjpfåˆ†æä¸å‡ºæ¥synchronized (this) {
+        //Ò»¸öĞèÒª¶ÔclasÎÄ¼ş´¦Àí
+        //Ò»¸ö¶ÔjavaÎÄ¼ş´¦Àí
+        //ÒòÎªjpf·ÖÎö²»³öÀ´synchronized (this) {
         //                tmp = new MyListNode(x, p._current._next);
         //            }
-        //ASTåˆ†æä¸å‡ºæ¥synchronized æ–¹æ³•
-        //æ‰€ä»¥ä¸¤ç§æ–¹æ³•ç»“åˆ
+        //AST·ÖÎö²»³öÀ´synchronized ·½·¨
+        //ËùÒÔÁ½ÖÖ·½·¨½áºÏ
 
 
         return flagUseJPFCheckWhetherLock;

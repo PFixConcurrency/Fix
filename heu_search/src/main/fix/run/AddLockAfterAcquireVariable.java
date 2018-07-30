@@ -198,4 +198,7 @@ public class AddLockAfterAcquireVariable {
         }
         return false;
     }
+
+    public static void propagate(int firstLoc, int lastLoc, Set<String> relevantVariableSet, String lockName, String filePath) {
+    }
 }

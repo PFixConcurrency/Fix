@@ -68,9 +68,9 @@ public class CheckWhetherLockedListener extends PropertyListenerAdapter {
 //            System.out.println("里面的是" +ei.toString() + "," + fi.getName() + "," + currentThread.getName() + "," + fins.getFileLocation());//输出锁中的所有信息
             for (int i = lockVector.size() - 1; i >= 0; i--) {//从后往前找
                 LocKSequence ls = lockVector.get(i);
-//                System.out.println("测试锁名字:" + ls.lockName);
                 if (ls.lockName.equals(ei.toString()) && currentThread.getName().equals(ls.threadName)) {
-//                    System.out.println("测试锁位置:" + res);
+//                    System.out.println("lock loc:" + res);
+//                    System.out.println("lock name:" + ls.lockName);
                     ls.sequence.add(new LockElement(ei.toString(), fi.getName(), currentThread.getName(), fins.getFileLocation()));
                     break;
                 }
@@ -95,9 +95,9 @@ public class CheckWhetherLockedListener extends PropertyListenerAdapter {
                     //先检查有没变量
                     if (le.field.equals(fieldName) && le.location.equals(fieldLoc)) {
 //                        System.out.println("*************" + le.toString());
+                        System.out.println(ls.lockName + "\t" + unlockedObject.toString() + "\t" + ls.threadName);
                         checkFlag = true;
                         protectLockName = ls.lockName;
-
                         break;
 //                        System.out.println("1有");
                     }

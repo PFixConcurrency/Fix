@@ -147,7 +147,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="tools" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -184,5 +183,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="tools" level="project" />
   </component>
 </module>

@@ -5,10 +5,7 @@ import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.*;
 import gov.nasa.jpf.vm.bytecode.FieldInstruction;
 import gov.nasa.jpf.vm.choice.ThreadChoiceFromSet;
-import p_heu.entity.Node;
-import p_heu.entity.ReadWriteNode;
-import p_heu.entity.ScheduleNode;
-import p_heu.entity.SearchState;
+import p_heu.entity.*;
 import p_heu.entity.filter.Filter;
 import p_heu.entity.pattern.Pattern;
 import p_heu.entity.sequence.Sequence;
@@ -23,6 +20,7 @@ public class SequenceProduceListener extends ListenerAdapter {
     private SearchState currentState;
     private boolean execResult;
     private Filter positionFilter;
+//    private LockNode ln;
 
     public SequenceProduceListener() {
         this.sequence = new Sequence();
@@ -31,6 +29,7 @@ public class SequenceProduceListener extends ListenerAdapter {
         currentState = null;
         execResult = true;
         positionFilter = null;
+//        ln = null;
     }
 
     public void setPositionFilter(Filter filter) {
@@ -81,6 +80,38 @@ public class SequenceProduceListener extends ListenerAdapter {
         }
     }
 
+    @Override
+    public void objectLocked(VM vm, ThreadInfo currentThread, ElementInfo lockedObject) {
+        String thread = currentThread.getName();
+        String lockElement = lockedObject.toString();
+        String location = currentThread.getPC().getFileLocation();
+        String type = currentThread.getPC().getClass().toString();
+        if(!(type.contains("MONITORENTER") || type.contains("MONITOREXIT") || type.contains("RETURN"))){
+            String[] locS = location.split(":");
+            int poi = Integer.parseInt(locS[1]) - 1;
+            location = locS[0] + ":" + String.valueOf(poi);
+//            System.out.println(thread + lockElement +location + type + "=================");
+        }
+        if(!lockElement.contains("java.")) {
+            LockNode lockNode = new LockNode(getNodeId(), thread, lockElement, location, type, "acq");
+            currentStateNodes.add(lockNode);
+        }
+//        ln = lockNode;
+    }
+
+    @Override
+    public void objectUnlocked(VM vm, ThreadInfo currentThread, ElementInfo unlockedObject) {
+        String thread = currentThread.getName();
+        String lockElement = unlockedObject.toString();
+        String location = currentThread.getPC().getFileLocation();
+        String type = currentThread.getPC().getClass().toString();
+        if(!lockElement.contains("java")) {
+            LockNode lockNode = new LockNode(getNodeId(), thread, lockElement, location, type, "rel");
+            currentStateNodes.add(lockNode);
+        }
+//        ln = lockNode;
+    }
+
     public void searchStarted(Search search) {
         VM vm = search.getVM();
         initCurrentState(vm);
@@ -96,6 +127,8 @@ public class SequenceProduceListener extends ListenerAdapter {
 
     private void saveLastState() {
         sequence = sequence.advance(currentState.getStateId(), currentState.getState(), currentStateNodes);
+//        sequence.getNodes().add(ln);
+//        ln = null;
     }
 
     private void initCurrentState(VM vm) {
@@ -110,4 +143,6 @@ public class SequenceProduceListener extends ListenerAdapter {
     public void searchFinished(Search search) {
         sequence = sequence.advanceToEnd(currentState.getStateId(),currentState.getState(), currentStateNodes, execResult);
     }
+
+
 }
