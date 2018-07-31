@@ -74,7 +74,7 @@ public class Fix {
             fixTime = "time for fixing:" + (endFixTime - startFixTime);
             //将修复方法写入文件中
             InsertCode.writeLogFile(fixMethods + fixTime, "fix result");
-            System.out.println("if still bug ,run again");
+            System.out.println("if still bug ,run again and again");
         }
 
     }
@@ -242,9 +242,9 @@ public class Fix {
             lockAdjust.adjust(addSyncFilePath);//合并锁
         } else if (patternCounter.getNodes().length == 4) {//长度为4,有时候要加静态全局锁
             boolean flagSame1 = UseASTAnalysisClass.assertSameFunction(threadA, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
-            boolean flagSame2 = UseASTAnalysisClass.assertSameFunction(threadB, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
+            boolean flagSame2 = UseASTAnalysisClass.assertSameFunction(threadB, ImportPath.examplesRootPath + "/exportExamples/" + threadB.get(0).getPosition().split(":")[0]);
 //            System.out.println("判断结果" + flagSame1 + "," + flagSame2);
-            if(flagSame1 && flagSame2) {
+            if(!flagSame1 && !flagSame2) {
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.globalStaticSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
@@ -407,7 +407,7 @@ public class Fix {
                             firstLoc = Math.min(firstLoc, existGlobalLockStart);
                             lastLoc = Math.max(lastLoc, existGlobalLockEnd);
                         }
-                        //都在run()里面需要全局静态锁
+                        /*//都在run()里面需要全局静态锁
                         if (UseASTAnalysisClass.checkInRun(firstLoc, lastLoc, analyseJavaPath)) {
                             if (!globalStaticObject.isDefineObject) {
                                 lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
@@ -416,7 +416,7 @@ public class Fix {
                             } else {
                                 lockName = globalStaticObject.objectName;
                             }
-                        }
+                        }*/
                         //加锁
                         examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);
                     } else {//有加锁的，直接修改原有锁
