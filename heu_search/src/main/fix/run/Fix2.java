@@ -132,8 +132,7 @@ public class Fix2 {
 //        while (i < 1) {
             Unicorn.PatternCounter patternCounter = firstList.get(i);
 //            Unicorn.PatternCounter patternCounter = firstList.get(whichToUse);
-            //用来记录
-//            reorder.r(firstList, i + 1,patternCounter.getPattern().getNodes()[0].getField(),patternCounter.getPattern().getNodes()[0].getPosition());
+
             i++;
             if (type == FixType.firstFix) {
                 //先将项目拷贝到exportExamples
@@ -243,11 +242,18 @@ public class Fix2 {
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
+            String lockName = LockP.acquireLockP(patternCounter.getNodes()[0].getElement(), sequence.getNodes(), patternCounter.getNodes()[0]);
+            String analyseJavaPath = ImportPath.examplesRootPath + "/exportExamples/" + patternCounter.getNodes()[0].getPosition().split(":")[0];
+
+            if (lockName.equals("null")) {
+                lockName = acquireLockName(patternCounter.getNodes()[0], analyseJavaPath);
+            }
+            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
         } else if (patternCounter.getNodes().length == 4) {//长度为4,有时候要加静态全局锁
             boolean flagSame1 = UseASTAnalysisClass.assertSameFunction(threadA, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
             boolean flagSame2 = UseASTAnalysisClass.assertSameFunction(threadB, ImportPath.examplesRootPath + "/exportExamples/" + threadB.get(0).getPosition().split(":")[0]);
 
-            if(!flagSame1 && !flagSame2) {
+            if (!flagSame1 && !flagSame2) {
 
                 //acquire lockP
                 String lockp1 = LockP.acquireLockP(threadA.get(0).getElement(), sequence.getNodes(), threadA.get(0));
@@ -259,14 +265,11 @@ public class Fix2 {
                 if (lockp1.equals("null") && lockp2.equals("null")) {
                     //add new lock
                     lockVar = "null";
-                }
-                else if (lockp1.equals("null")) {
+                } else if (lockp1.equals("null")) {
                     lockVar = lockp2;
-                }
-                else if (lockp2.equals("null")) {
+                } else if (lockp2.equals("null")) {
                     lockVar = lockp1;
-                }
-                else {
+                } else {
                     lockVar = LockP.acquireLockPOfTwoVar(threadA.get(0).getElement(), threadA.get(0).getElement(), sequence.getNodes(), threadA.get(0));
                 }
 
@@ -277,7 +280,7 @@ public class Fix2 {
                 lockAdjust.setOneLockFinish(true);//表示第一次执行完
                 addSynchronized(threadB, AddSyncType.globalStaticSync);
                 lockAdjust.adjust(addSyncFilePath);//合并锁
-            }else {
+            } else {
                 addSynchronizedOfFourLengthPattern(patternCounter.getNodes());
             }
         }
@@ -378,8 +381,8 @@ public class Fix2 {
                         //可优化
 //                        lockName = acquireLockName(node, analyseJavaPath);
 //                        System.out.println("lockp==========================");
-                        lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(),rwnList.get(0));
-                        if(lockName.equals("null")) {
+                        lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
+                        if (lockName.equals("null")) {
                             lockName = acquireLockName(node, analyseJavaPath);
                         }
 //                        System.out.println(lockName + "====================");
@@ -388,7 +391,7 @@ public class Fix2 {
 
                     } else if (type == AddSyncType.globalStaticSync) {//leng 4
                         if (!globalStaticObject.isDefineObject) {
-                            if(lenFourLockVar.equals("null")) {
+                            if (lenFourLockVar.equals("null")) {
                                 lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
                             } else {
                                 lockName = lenFourLockVar;
@@ -460,6 +463,9 @@ public class Fix2 {
                 //跨类搜索
                 useSoot.getCallGraph(rwnList.get(0), rwnList.get(1));
 
+                Propagate.numSet.add(Integer.parseInt(rwnList.get(0).getPosition().split(":")[1]));
+                Propagate.numSet.add(Integer.parseInt(rwnList.get(1).getPosition().split(":")[1]));
+
                 //如果跨类没找到，就直接结束
                 if (useSoot.getSyncJava().equals(".")) {
                     lockAdjust.setOneLockFile("");//设为空，以后就不会合并了
@@ -527,7 +533,7 @@ public class Fix2 {
                             }
                         }
                     } else {
-                        if(lenFourLockVar.equals("null")) {
+                        if (lenFourLockVar.equals("null")) {
                             lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
                         } else {
                             lockName = lenFourLockVar;
@@ -563,10 +569,10 @@ public class Fix2 {
                 //然后获得需要加何种锁
                 //用来获取锁的策略
 //                System.out.println("lockp==========================");
-                lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(),rwnList.get(0));
-                if(lockName.equals("null")) {
+                lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
+                if (lockName.equals("null")) {
                     lockName = acquireLockName(node, analyseJavaPath);
-                }else if(lockName.equals("")){
+                } else if (lockName.equals("")) {
                     //对于buggyprogram这中两个类在一个文件中，会拿到空字符串，当成this一样处理
                     lockName = "this";
 
@@ -620,6 +626,9 @@ public class Fix2 {
             fixMethods += "aim at : " + rwnList.get(0) + "Lock start and stop position : " + firstLoc + "->" + lastLoc + '\n';
 
         }
+        for (int index = firstLoc; index <= lastLoc + 1; index++) {
+            Propagate.numSet.add(index);
+        }
     }
 
 
@@ -635,18 +644,17 @@ public class Fix2 {
         for (int i = 1; i < 4; ++i) {
             if (rwnList[0].getThread().equals(rwnList[i].getThread())) {
                 part1.add(rwnList[i]);
-            }
-            else {
+            } else {
                 part2.add(rwnList[i]);
             }
         }
         int firstLoc = 0, lastLoc = 0;
         boolean flagSame = true;
-        if(!part1.get(0).getPosition().split(":")[0].equals(part1.get(1).getPosition().split("0")[0])){
+        if (!part1.get(0).getPosition().split(":")[0].equals(part1.get(1).getPosition().split("0")[0])) {
             flagSame = false;
         }
 
-        if(!flagSame){
+        if (!flagSame) {
             //跨类搜索
             useSoot.getCallGraph(part1.get(0), part1.get(1));
 
@@ -683,21 +691,18 @@ public class Fix2 {
         if (lockp1.equals("null") && lockp2.equals("null")) {
             //添加新的所变量
             lockVar = "null";
-        }
-        else if (lockp1.equals("null")) {
+        } else if (lockp1.equals("null")) {
             lockVar = lockp2;
-        }
-        else if (lockp2.equals("null")) {
+        } else if (lockp2.equals("null")) {
             lockVar = lockp1;
-        }
-        else {
+        } else {
             lockVar = LockP.acquireLockPOfTwoVar(part1.get(0).getElement(), part1.get(1).getElement(), sequence.getNodes(), part1.get(0));
         }
 
-        firstLoc = Math.min(part1Start,part1Start);
+        firstLoc = Math.min(part1Start, part1Start);
         lastLoc = Math.max(part1End, part2End);
 //        System.out.println(lockVar + firstLoc + lastLoc + "==============");
-        if(lockVar.equals("null")){
+        if (lockVar.equals("null")) {
             lockVar = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
         }
         //检查是否存在锁再加锁
@@ -723,12 +728,12 @@ public class Fix2 {
         //减少锁
         String temVar = "";
         int count = 0;
-        for(int i = 0; i <= rwnList.length; i=i+3) {
+        for (int i = 0; i <= rwnList.length; i = i + 3) {
             if (CheckWhetherLocked.check(rwnList[i].getPosition(), rwnList[i].getField(), sourceClassPath, analyseJavaPath)) {
                 int startLockLine = LockP.acqStartLine(rwnList[i], sequence.getNodes());
                 int endLockLine = LockP.acqEndLine(rwnList[i], sequence.getNodes());
 //                System.out.println(startLockLine + "," + endLockLine);
-                LockP.deleteLock(startLockLine,endLockLine,analyseJavaPath);
+                LockP.deleteLock(startLockLine, endLockLine, analyseJavaPath);
             }
         }
     }
@@ -831,8 +836,8 @@ public class Fix2 {
             firstLoc = Math.min(oneLoc, twoLoc);
             lastLoc = Math.max(oneLoc, twoLoc);
 //            String lockName = acquireLockName(patternCounter.getNodes()[0], analyseJavaPath);
-            String lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(),rwnList.get(0));
-            if(lockName.equals("null")) {
+            String lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
+            if (lockName.equals("null")) {
                 lockName = acquireLockName(rwnList.get(0), analyseJavaPath);
             }
             if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, analyseJavaPath)) {
@@ -861,8 +866,12 @@ public class Fix2 {
                     LockPolicyPopularize.lastLoc = lastLoc;
                     LockPolicyPopularize.lockName = lockName;
                     LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
+                    for(int index = firstLoc; index <= lastLoc + 1;index++){
+                        Propagate.numSet.add(index);
+                    }
                 }
             }
+            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
         } else {//不在一个函数中
             //长度为2加锁时候不跨类
 
@@ -878,8 +887,8 @@ public class Fix2 {
                     needCross = false;
                 }
             }
-//            System.out.println("zaibbuzai" + needCross);
-            if(!needCross){
+            if (!needCross) {
+                String lockName = "";
                 for (int i = 0; i < 2; i++) {
                     String position = patternCounter.getNodes()[i].getPosition();
                     String[] positionArg = position.split(":");
@@ -888,12 +897,12 @@ public class Fix2 {
                     //如果已有锁，直接用现有的锁
                     //如果没有，再寻找新锁
 //                    String lockName = acquireLockName(patternCounter.getNodes()[i], analyseJavaPath);
-                    String lockName = "";
 
-                    lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(),rwnList.get(0));
-                    if(lockName.equals("null")) {
+
+                    lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
+                    if (lockName.equals("null")) {
                         lockName = acquireLockName(patternCounter.getNodes()[i], analyseJavaPath);
-                    }else if(lockName.equals("")){
+                    } else if (lockName.equals("")) {
                         //对于buggyprogram这中两个类在一个文件中，会拿到空字符串，当成this一样处理
                         lockName = "this";
 
@@ -935,9 +944,14 @@ public class Fix2 {
 
                             lockAdjust.adjust(analyseJavaPath);
                             LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
+                            //已经加锁,添加进去
+                            for (int index = firstLoc; index <= lastLoc + 1; index++) {
+                                Propagate.numSet.add(index);
+                            }
                         }
                     }
                 }
+                Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
                 return;
             }
 
@@ -988,21 +1002,28 @@ public class Fix2 {
                 //暂定为都加静态锁，this锁不一定对
                 //后来根据stringbuffer发现，加静态锁也不一定对，要考虑到底是哪个对象的变量
 
-                lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(),rwnList.get(0));
-                if(lockName.equals("null")) {
+                lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
+                if (lockName.equals("null")) {
                     if (flagStaticLock) {
                         lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
                     } else {
                         lockName = leftMethodName;
                     }
-                } else if(lockName.equals("this")){
-                    if(!flagStaticLock){
+                } else if (lockName.equals("this")) {
+                    if (!flagStaticLock) {
                         lockName = leftMethodName;
                     }
                 }
 
                 examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                 lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
+
+                for (int index = firstLoc; index <= lastLoc + 1; index++) {
+                    Propagate.numSet.add(index);
+                }
+                Propagate.numSet.add(Integer.parseInt(rwnList.get(0).getPosition().split(":")[1]));
+                Propagate.numSet.add(Integer.parseInt(rwnList.get(1).getPosition().split(":")[1]));
+                Propagate.p(lockName, rwnList.get(0), sequence, sourceClassPath, analyseJavaPath);
             }
         }
     }

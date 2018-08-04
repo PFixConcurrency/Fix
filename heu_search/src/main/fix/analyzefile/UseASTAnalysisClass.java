@@ -33,6 +33,8 @@ public class UseASTAnalysisClass {
 
     static boolean flagInRun = false;
 
+    static boolean flagField = false;//表示是不是变量定义
+
 
     public static void main(String[] args) {
 //        System.out.println(isConstructOrIsMemberVariableOrReturn(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
@@ -278,6 +280,30 @@ public class UseASTAnalysisClass {
     }
 
 
+    //是不是定义的位置
+    public static boolean useASTCheckDec(ReadWriteNode readWriteNode, String filePath) {
+
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(new ASTVisitor() {
+            @Override
+            public boolean visit(FieldDeclaration node) {
+                //比较行数相同即可，无需再比较变量名称
+                if(cu.getLineNumber(node.getStartPosition()) == Integer.parseInt(readWriteNode.getPosition().split(":")[1])){
+                    flagField = true;
+
+                }
+                return true;
+            }
+        });
+
+        return flagField;
+    }
+
     //是不是在一个函数中
     public static boolean assertSameFunction(List<ReadWriteNode> nodesList, String filePath) {
         ReadWriteNode rwn1 = nodesList.get(0);
@@ -448,10 +474,10 @@ public class UseASTAnalysisClass {
                 if (node.getName().toString().equals("run")) {
                     int start = cu.getLineNumber(node.getStartPosition());
                     int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
-                    if((firstLoc >= start && firstLoc <= end) && (lastLoc >= start && lastLoc <= end)){
+                    if ((firstLoc >= start && firstLoc <= end) && (lastLoc >= start && lastLoc <= end)) {
                         flagInRun = true;
-                    }else {
-                        flagInRun =false;
+                    } else {
+                        flagInRun = false;
                     }
                 }
                 return super.visit(node);

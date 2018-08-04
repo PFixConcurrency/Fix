@@ -129,8 +129,6 @@ public class Fix {
 //        while (i < 1) {
             Unicorn.PatternCounter patternCounter = firstList.get(i);
 //            Unicorn.PatternCounter patternCounter = firstList.get(whichToUse);
-            //用来记录
-//            reorder.r(firstList, i + 1,patternCounter.getPattern().getNodes()[0].getField(),patternCounter.getPattern().getNodes()[0].getPosition());
             i++;
             if (type == FixType.firstFix) {
                 //先将项目拷贝到exportExamples

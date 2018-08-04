@@ -107,7 +107,6 @@ public class Unicorn {
             jpf.addListener(listener);
             jpf.run();
 
-
             Sequence seq = listener.getSequence();
             //sequence中有时候会出现同一个线程对某个地方重复执行两次的情况
             //我们只记录第二次，放弃第一次

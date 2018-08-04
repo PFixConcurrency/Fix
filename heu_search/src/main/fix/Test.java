@@ -1,5 +1,7 @@
 package fix;
 
+import fix.analyzefile.UseASTAnalysisClass;
+import fix.entity.lock.ExistLock;
 import fix.run.Fix;
 import org.eclipse.jdt.core.dom.*;
 import p_heu.entity.ReadWriteNode;
@@ -23,11 +25,40 @@ public class Test {
 
 //        String read = "tmp = new MyListNode(x, p._current._next);";
 
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        /*Map<String, Integer> map = new HashMap<String, Integer>();
         map.put("123",1);
-        map.put("123",1);
+        map.put("123",1);*/
+       /* Set s = new HashSet();
+        s.add(1);
+        s.add(1);
+        s.add(2);
+        for(Object o : s)
+            System.out.println(o);
+        System.out.println(s.contains(3));*/
+//        useASTCFindLockLine("C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
+        UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
+        lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
+        System.out.println(UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(16, 16, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\store\\Store.java"));
     }
 
+
+    public static void useASTCFindLockLine(String filePath) {
+
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(new ASTVisitor() {
+            @Override
+            public boolean visit(FieldDeclaration node) {
+                System.out.println(node+ "===========");
+                return super.visit(node);
+            }
+        });
+
+    }
 
     static void test() {
         while (true) {
