@@ -36,9 +36,8 @@ public class Test {
             System.out.println(o);
         System.out.println(s.contains(3));*/
 //        useASTCFindLockLine("C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
-        UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
-        lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
-        System.out.println(UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(16, 16, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\store\\Store.java"));
+        int poi = 11;
+        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(poi, 12, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
     }
 
 

@@ -133,6 +133,8 @@ public class AddLockAfterAcquireVariable {
 //                           System.out.println("结束" + cu.getLineNumber(matchVariable.getEndLine() + 1));
 
                             //不能整个类加锁，变量不是在构造函数里
+
+
                             if (!(isMemberVariable(matchVariable)) && !(isConstruct(matchVariable.getSameFatherNode().getParent()))) {
                                 boolean already = false;
                                 //没有数据直接加锁
@@ -147,12 +149,21 @@ public class AddLockAfterAcquireVariable {
                                     }
                                 }
                                 if (!already) {
-                                    int start = cu.getLineNumber(matchVariable.getStartLine());
-                                    int end = cu.getLineNumber(matchVariable.getEndLine() + 1);
+//                                    int start = cu.getLineNumber(matchVariable.getStartLine());
+//                                    int end = cu.getLineNumber(matchVariable.getEndLine() + 1);
+                                    int start = Integer.MAX_VALUE, end = 0;
+                                    for (ASTNode nn : matchVariable.getMatchSet()) {
+
+                                        start = Math.min(cu.getLineNumber(nn.getStartPosition()),start);
+                                        end = Math.max(cu.getLineNumber(nn.getStartPosition() + nn.getLength()),end);
+                                    }
+
+                                    end++;
                                     if (!(start >= firstLoc && start <= lastLoc) || (end >= firstLoc && end <= lastLoc)) {
                                         //加锁
                                         InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
                                         InsertCode.insert(end, " }", filePath);
+
 
                                         //将数据放到list里面
                                         RelevantVarLockLine r = new RelevantVarLockLine(start, end);
@@ -176,10 +187,13 @@ public class AddLockAfterAcquireVariable {
     //检测是不是成员变量
     private static boolean isMemberVariable(MatchVariable matchVariable) {
 
-        //是类的类型
-        if (matchVariable.getSameFatherNode().getParent() instanceof TypeDeclaration)
-            return true;
 
+        //是类的类型
+        if (matchVariable.getSameFatherNode().getParent() instanceof TypeDeclaration) {
+            System.out.println("daozhe");
+            return true;
+        }
+        System.out.println("fouzedaozhe");
         return false;
     }
 
@@ -197,8 +211,5 @@ public class AddLockAfterAcquireVariable {
             parent = parent.getParent();
         }
         return false;
-    }
-
-    public static void propagate(int firstLoc, int lastLoc, Set<String> relevantVariableSet, String lockName, String filePath) {
     }
 }

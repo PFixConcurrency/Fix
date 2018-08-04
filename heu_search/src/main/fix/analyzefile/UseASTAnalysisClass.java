@@ -57,7 +57,9 @@ public class UseASTAnalysisClass {
         /*lockLine = useASTCheckVariableInLock(444, 448, "D:/Patch/examples/stringbuffer/StringBuffer.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
-        System.out.println(UseASTAnalysisClass.checkInRun(29, 30, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\wronglock2\\Main.java"));
+//        System.out.println(UseASTAnalysisClass.checkInRun(29, 30, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\wronglock2\\Main.java"));
+        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
+        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -73,6 +75,8 @@ public class UseASTAnalysisClass {
 
     //判断是不是成员变量或者构造函数
     public static boolean isConstructOrIsMemberVariableOrReturn(int firstLoc, int lastLoc, String filePath) {
+        flagConstruct = false;
+        flagMember = false;
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
         return flagConstruct || flagMember;
     }

@@ -109,7 +109,7 @@ public class Fix2 {
         patternListTime = "time for getting pattern list : " + (endUnicornTime - startUnicornTime);
 
         //将所有的pattern打印出来，方便以后选择
-//        System.out.println(firstList);
+        System.out.println(firstList);
 
         //将所有pattern写入文件
         InsertCode.writeLogFile(firstList.toString() + '\n' + patternListTime, "pattern list");
@@ -119,8 +119,8 @@ public class Fix2 {
         System.out.print("select correct pattern number(The bottom one is zero):");*/
 
         //此处需要手动选择
-//        Scanner sc = new Scanner(System.in);
-//        int whichToUse = sc.nextInt();//使用第几个pattern
+        Scanner sc = new Scanner(System.in);
+        int whichToUse = sc.nextInt();//使用第几个pattern
 
         startFixTime = System.currentTimeMillis();
        /* int whichToUse = 0;
@@ -128,10 +128,10 @@ public class Fix2 {
         Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);*/
 
         int i = 0;
-        while (i < firstList.size()) {
-//        while (i < 1) {
-            Unicorn.PatternCounter patternCounter = firstList.get(i);
-//            Unicorn.PatternCounter patternCounter = firstList.get(whichToUse);
+//        while (i < firstList.size()) {
+        while (i < 1) {
+//            Unicorn.PatternCounter patternCounter = firstList.get(i);
+            Unicorn.PatternCounter patternCounter = firstList.get(whichToUse);
 
             i++;
             if (type == FixType.firstFix) {
@@ -165,7 +165,7 @@ public class Fix2 {
                 RecordSequence.display(patternCounter.getFirstFailAppearPlace());
 
                 //将sequence写入文件中
-//                InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "sequence for fix");
+                InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "sequence for fix");
                 sequence = patternCounter.getFirstFailAppearPlace();
 
                 //对拷贝的项目进行修复
@@ -282,6 +282,7 @@ public class Fix2 {
                 lockAdjust.adjust(addSyncFilePath);//合并锁
             } else {
                 addSynchronizedOfFourLengthPattern(patternCounter.getNodes());
+                return;
             }
         }
 
@@ -725,6 +726,11 @@ public class Fix2 {
         }
         examplesIO.addLockToOneVar(firstLoc, lastLoc, lockVar, analyseJavaPath);//待定
 
+        LockPolicyPopularize.firstLoc = firstLoc;
+        LockPolicyPopularize.lastLoc = lastLoc;
+        LockPolicyPopularize.lockName = lockVar;
+        LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
+
         //减少锁
         String temVar = "";
         int count = 0;
@@ -736,6 +742,7 @@ public class Fix2 {
                 LockP.deleteLock(startLockLine, endLockLine, analyseJavaPath);
             }
         }
+
     }
 
     //读到那一行，然后对字符串处理

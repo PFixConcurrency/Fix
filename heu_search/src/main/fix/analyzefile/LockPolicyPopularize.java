@@ -25,10 +25,9 @@ public class LockPolicyPopularize {
 
     public static void fixRelevantVar(String filePath) {
         //获取到关联变量
-//        Set<String> relevantVariabSet = acquireRekevantVar(firstLoc, lastLoc, threadName, className);
-        if (!(lockName.equals("this") || lockName.equals("objectFix"))) {
-            return;
-        }
+//        if (!(lockName.equals("this") || lockName.equals("objectFix"))) {
+//            return;
+//        }
         acquireRekevantVar(firstLoc, lastLoc, filePath);
 
         /*System.out.println("关联变量");
@@ -41,9 +40,6 @@ public class LockPolicyPopularize {
             //set中大于等于两个变量才有加锁的意义
             //不然加锁没意义
             AddLockAfterAcquireVariable.lock(firstLoc, lastLoc, relevantVariableSet, lockName, filePath);
-        } else {
-            //推广锁策略
-            AddLockAfterAcquireVariable.propagate(firstLoc, lastLoc, relevantVariableSet, lockName, filePath);
         }
     }
 
