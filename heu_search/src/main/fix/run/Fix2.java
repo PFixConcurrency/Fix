@@ -248,7 +248,7 @@ public class Fix2 {
             if (lockName.equals("null")) {
                 lockName = acquireLockName(patternCounter.getNodes()[0], analyseJavaPath);
             }
-            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
+            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath);
         } else if (patternCounter.getNodes().length == 4) {//长度为4,有时候要加静态全局锁
             boolean flagSame1 = UseASTAnalysisClass.assertSameFunction(threadA, ImportPath.examplesRootPath + "/exportExamples/" + threadA.get(0).getPosition().split(":")[0]);
             boolean flagSame2 = UseASTAnalysisClass.assertSameFunction(threadB, ImportPath.examplesRootPath + "/exportExamples/" + threadB.get(0).getPosition().split(":")[0]);
@@ -869,7 +869,7 @@ public class Fix2 {
                     }
                 }
             }
-            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
+            Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath);
         } else {//不在一个函数中
             //长度为2加锁时候不跨类
 
@@ -949,7 +949,7 @@ public class Fix2 {
                         }
                     }
                 }
-                Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath, analyseJavaPath);
+                Propagate.p(lockName, patternCounter.getNodes()[0], sequence, sourceClassPath);
                 return;
             }
 
@@ -1021,7 +1021,7 @@ public class Fix2 {
                 }
                 Propagate.numSet.add(Integer.parseInt(rwnList.get(0).getPosition().split(":")[1]));
                 Propagate.numSet.add(Integer.parseInt(rwnList.get(1).getPosition().split(":")[1]));
-                Propagate.p(lockName, rwnList.get(0), sequence, sourceClassPath, analyseJavaPath);
+                Propagate.p(lockName, rwnList.get(0), sequence, sourceClassPath);
             }
         }
     }

@@ -32,8 +32,16 @@ public class Test {
             System.out.println(o);
         System.out.println(s.contains(3));*/
 //        useASTCFindLockLine("C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
-        int poi = 11;
-        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariable(poi, 12, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
+
+        Set s = new HashSet();
+        s.add(100);
+        for(int i = 1;i < 4;i++)
+            s.add(i);
+        s.add(0);
+        s.add(1);
+        for(Object o : s)
+            System.out.println(o);
+
     }
 
 

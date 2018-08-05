@@ -72,6 +72,7 @@ public class UseASTAnalysisClass {
 
     //判断是不是成员变量或者构造函数
     public static boolean isConstructOrIsMemberVariable(int firstLoc, int lastLoc, String filePath) {
+        //每次都需要重置
         flagConstruct = false;
         flagMember = false;
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
