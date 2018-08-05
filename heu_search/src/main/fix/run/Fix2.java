@@ -182,7 +182,7 @@ public class Fix2 {
             } catch (Exception e) {
                 System.out.println("Not this pattern");
             }
-//sc.nextInt();whichToUse++;
+
         }
     }
 
@@ -238,9 +238,9 @@ public class Fix2 {
         //长度为3加对象锁
         if (patternCounter.getNodes().length == 3) {
             //根据获得的list，进行加锁
-            addSynchronized(threadA, AddSyncType.localSync);
+            addSynchronized(threadA, AddSyncType.len3);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
-            addSynchronized(threadB, AddSyncType.localSync);
+            addSynchronized(threadB, AddSyncType.len3);
             lockAdjust.adjust(addSyncFilePath);//合并锁
             String lockName = LockP.acquireLockP(patternCounter.getNodes()[0].getElement(), sequence.getNodes(), patternCounter.getNodes()[0]);
             String analyseJavaPath = ImportPath.examplesRootPath + "/exportExamples/" + patternCounter.getNodes()[0].getPosition().split(":")[0];
@@ -276,9 +276,9 @@ public class Fix2 {
 
                 lenFourLockVar = lockVar;
                 //根据获得的list，进行加锁
-                addSynchronized(threadA, AddSyncType.globalStaticSync);
+                addSynchronized(threadA, AddSyncType.len4);
                 lockAdjust.setOneLockFinish(true);//表示第一次执行完
-                addSynchronized(threadB, AddSyncType.globalStaticSync);
+                addSynchronized(threadB, AddSyncType.len4);
                 lockAdjust.adjust(addSyncFilePath);//合并锁
             } else {
                 addSynchronizedOfFourLengthPattern(patternCounter.getNodes());
@@ -359,8 +359,8 @@ public class Fix2 {
                 for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
                     //对于局部锁，先检查它是否已经被加锁
-                    if (type == AddSyncType.localSync) {
-                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {//检查是否存在锁
+                    if (type == AddSyncType.len3) {
+                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {//检查是否存在锁
                             if (i == 1 && varHasLock == true) {//表示两个都有锁
                                 return;//直接结束
                             } else {
@@ -371,14 +371,14 @@ public class Fix2 {
                     } else {
                         //当长度为4，一致性错误时，即使原先变量被加锁，还是要加锁
                         //存在锁
-                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {
+                        if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {
                             existLock = existLockName(rwnList.get(i));
                             existGlobalLockStart = Math.min(existGlobalLockStart, existLock.getStartLine());
                             existGlobalLockEnd = Math.max(existGlobalLockEnd, existLock.getEndLine());
                         }
                     }
                     //应该要加什么锁
-                    if (type == AddSyncType.localSync) {//需要添加局部锁,此处表示长度为3
+                    if (type == AddSyncType.len3) {//需要添加局部锁,此处表示长度为3
                         //可优化
 //                        lockName = acquireLockName(node, analyseJavaPath);
 //                        System.out.println("lockp==========================");
@@ -390,7 +390,7 @@ public class Fix2 {
 //                        System.exit(-1);
 
 
-                    } else if (type == AddSyncType.globalStaticSync) {//leng 4
+                    } else if (type == AddSyncType.len4) {//leng 4
                         if (!globalStaticObject.isDefineObject) {
                             if (lenFourLockVar.equals("null")) {
                                 lockName = UseASTAnalysisClass.useASTToaddStaticObject(analyseJavaPath);
@@ -417,7 +417,7 @@ public class Fix2 {
                 }
 
                 //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
-                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, analyseJavaPath)) {
+                if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc, analyseJavaPath)) {
 
                     //判断加锁会不会和for循环等交叉
                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, analyseJavaPath);
@@ -438,7 +438,7 @@ public class Fix2 {
 
                     //两个地方都没有加锁
                     if (!varHasLock) {
-                        if (type == AddSyncType.globalStaticSync) {
+                        if (type == AddSyncType.len4) {
                             firstLoc = Math.min(firstLoc, existGlobalLockStart);
                             lastLoc = Math.max(lastLoc, existGlobalLockEnd);
                         }
@@ -494,7 +494,7 @@ public class Fix2 {
 
 
                 //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
-                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
+                if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
                     //判断加锁会不会和for循环等交叉
                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                     firstLoc = lockLine.getFirstLoc();
@@ -513,7 +513,7 @@ public class Fix2 {
                     //后来根据stringbuffer发现，加静态锁也不一定对，要考虑到底是哪个对象的变量
 
 //                    System.out.println("lockp==========================");
-                    if (type == AddSyncType.localSync) {//需要添加局部锁,此处表示长度为3)
+                    if (type == AddSyncType.len3) {//需要添加局部锁,此处表示长度为3)
                         lockName = LockP.acquireLockP(rwnList.get(0).getElement(), sequence.getNodes(), rwnList.get(0));
                         if (lockName.equals("null")) {
                             if (flagStaticLock) {
@@ -562,7 +562,7 @@ public class Fix2 {
             //长度为4，一般不进入这个分支
             ReadWriteNode node = rwnList.get(0);
 
-            if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, analyseJavaPath)) {
+            if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {
 
                 //没被加锁，获得需要加锁的行数
                 firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
@@ -670,23 +670,17 @@ public class Fix2 {
             lastLoc = useSoot.getMaxLine();
         }
         int num1, num2;
-//        System.out.println(part1.get(0).getPosition().substring(part1.get(0).getPosition().indexOf(':') + 1));
-//        System.out.println(part1.get(1).getPosition().substring(part1.get(1).getPosition().indexOf(':') + 1));
         num1 = Integer.parseInt(part1.get(0).getPosition().substring(part1.get(0).getPosition().indexOf(':') + 1));
         num2 = Integer.parseInt(part1.get(1).getPosition().substring(part1.get(1).getPosition().indexOf(':') + 1));
         int part1Start = num1 < num2 ? num1 : num2;
         int part1End = num1 < num2 ? num2 + 1 : num1 + 1;
-//        System.out.println(part1Start + "||||" + part1End);
         num1 = Integer.parseInt(part2.get(0).getPosition().substring(part2.get(0).getPosition().indexOf(':') + 1));
         num2 = Integer.parseInt(part2.get(1).getPosition().substring(part2.get(1).getPosition().indexOf(':') + 1));
         int part2Start = num1 < num2 ? num1 : num2;
         int part2End = num1 < num2 ? num2 + 1 : num1 + 1;
-//        System.out.println(part2Start + "||||" + part2End);
 
         String lockp1 = LockP.acquireLockP(part1.get(0).getElement(), sequence.getNodes(), part1.get(0));
         String lockp2 = LockP.acquireLockP(part1.get(1).getElement(), sequence.getNodes(), part1.get(1));
-//        System.out.println("LockP1: " + lockp1);
-//        System.out.println("LockP2: " + lockp2);
 
         String lockVar;
         if (lockp1.equals("null") && lockp2.equals("null")) {
@@ -732,13 +726,10 @@ public class Fix2 {
         LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
 
         //减少锁
-        String temVar = "";
-        int count = 0;
         for (int i = 0; i <= rwnList.length; i = i + 3) {
-            if (CheckWhetherLocked.check(rwnList[i].getPosition(), rwnList[i].getField(), sourceClassPath, analyseJavaPath)) {
+            if (CheckWhetherLocked.check(rwnList[i].getPosition(), rwnList[i].getField(), sourceClassPath)) {
                 int startLockLine = LockP.acqStartLine(rwnList[i], sequence.getNodes());
                 int endLockLine = LockP.acqEndLine(rwnList[i], sequence.getNodes());
-//                System.out.println(startLockLine + "," + endLockLine);
                 LockP.deleteLock(startLockLine, endLockLine, analyseJavaPath);
             }
         }
@@ -847,10 +838,10 @@ public class Fix2 {
             if (lockName.equals("null")) {
                 lockName = acquireLockName(rwnList.get(0), analyseJavaPath);
             }
-            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, analyseJavaPath)) {
+            if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc + 1, analyseJavaPath)) {
                 //加锁
                 //检查是否存在锁再加锁
-                if (!CheckWhetherLocked.check(patternCounter.getNodes()[0].getPosition(), patternCounter.getNodes()[0].getField(), sourceClassPath, analyseJavaPath)) {
+                if (!CheckWhetherLocked.check(patternCounter.getNodes()[0].getPosition(), patternCounter.getNodes()[0].getField(), sourceClassPath)) {
                     //判断加锁会不会和for循环等交叉
                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, analyseJavaPath);
                     firstLoc = lockLine.getFirstLoc();
@@ -889,7 +880,7 @@ public class Fix2 {
             for (int i = 0; i < 2; i++) {
                 String position = patternCounter.getNodes()[i].getPosition();
                 String[] positionArg = position.split(":");
-                if (UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, analyseJavaPath)) {
+                if (UseASTAnalysisClass.isConstructOrIsMemberVariable(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, analyseJavaPath)) {
                     //在构造函数,不要跨类修复
                     needCross = false;
                 }
@@ -919,10 +910,10 @@ public class Fix2 {
                     firstLoc = Integer.parseInt(positionArg[1]);
                     lastLoc = firstLoc;
 
-                    if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, analyseJavaPath)) {
+                    if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, analyseJavaPath)) {
                         //加锁
                         //检查是否存在锁再加锁
-                        if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath, analyseJavaPath)) {
+                        if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath)) {
                             fixMethods += "Locked position" + Integer.parseInt(positionArg[1]) + '\n';
                             //判断一下能不能用当前的锁直接进行修复
 
@@ -991,7 +982,7 @@ public class Fix2 {
 
 
             //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
-            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
+            if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
                 //判断加锁会不会和for循环等交叉
                 UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                 firstLoc = lockLine.getFirstLoc();
@@ -1051,8 +1042,8 @@ public class Fix2 {
         fixMethods += "The location of semaphore use : " + flagAssertLocation + '\n';
 
         //构造函数不能加信号量
-        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, addSyncFilePath) &&
-                !UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, addSyncFilePath)) {
+        if (!UseASTAnalysisClass.isConstructOrIsMemberVariable(flagAssertLocation, flagAssertLocation, addSyncFilePath) &&
+                !UseASTAnalysisClass.isConstructOrIsMemberVariable(flagAssertLocation, flagAssertLocation, addSyncFilePath)) {
             //添加信号量的定义
             examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", addSyncFilePath);//待修订
 

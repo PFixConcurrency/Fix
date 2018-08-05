@@ -13,10 +13,10 @@ public class CheckWhetherLocked {
     //要寻找的变量的位置,形式必须是   包名/java文件：行数1
     //"account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("atmoerror/BankAccount.java:11","total", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
+        System.out.println(check("atmoerror/BankAccount.java:11","total", ImportPath.examplesRootPath + "/out/production/Patch"));
 //        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
-    public static boolean check(String variableLoc, String variableName, String classpath, String javaFilePath) {
+    public static boolean check(String variableLoc, String variableName, String classpath) {
         String[] str = new String[]{
 //                "+classpath=" + ImportPath.examplesRootPath + "\\out\\production\\Patch",
                 "+classpath=" + classpath,

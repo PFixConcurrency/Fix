@@ -31,8 +31,8 @@ public class Propagate {
                        /* System.out.println("get");
                         System.out.println(rwn);
                         System.out.println(firstLoc + "," + lastLoc + "," + analyseJavaPath);
-                        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(11, 11, analyseJavaPath) + "get2");*/
-                        if (!CheckWhetherLocked.check(rwn.getPosition(), rwn.getField(), sourceClassPath, analyseJavaPath) && !UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, analyseJavaPath)) {
+                        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariable(11, 11, analyseJavaPath) + "get2");*/
+                        if (!CheckWhetherLocked.check(rwn.getPosition(), rwn.getField(), sourceClassPath) && !UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc + 1, analyseJavaPath)) {
 
                             System.out.println("dao1");
                             System.out.println(rwn);
@@ -56,5 +56,15 @@ public class Propagate {
                 }
             }
         }
+    }
+
+    public static void addSet(int firstLoc, int lastLoc) {
+        for (int i = firstLoc; i <= lastLoc + 1; i++) {
+            numSet.add(i);
+        }
+    }
+
+    public static void addSet(int poi) {
+        numSet.add(poi);
     }
 }

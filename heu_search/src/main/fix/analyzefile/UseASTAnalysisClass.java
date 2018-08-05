@@ -1,6 +1,5 @@
 package fix.analyzefile;
 
-import fix.entity.ImportPath;
 import fix.entity.lock.ExistLock;
 import fix.io.ExamplesIO;
 import org.eclipse.jdt.core.dom.*;
@@ -37,7 +36,7 @@ public class UseASTAnalysisClass {
 
 
     public static void main(String[] args) {
-//        System.out.println(isConstructOrIsMemberVariableOrReturn(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
+//        System.out.println(isConstructOrIsMemberVariable(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
         /*List<ReadWriteNode> nodesList = new ArrayList<ReadWriteNode>();
         nodesList.add(new ReadWriteNode(1, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:52"));
         nodesList.add(new ReadWriteNode(2, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:53"));
@@ -57,9 +56,7 @@ public class UseASTAnalysisClass {
         /*lockLine = useASTCheckVariableInLock(444, 448, "D:/Patch/examples/stringbuffer/StringBuffer.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
-//        System.out.println(UseASTAnalysisClass.checkInRun(29, 30, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\wronglock2\\Main.java"));
-        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
-        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(11, 11, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
+        System.out.println(UseASTAnalysisClass.checkInRun(39, 40, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\airline\\Bug.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -74,7 +71,7 @@ public class UseASTAnalysisClass {
     }
 
     //判断是不是成员变量或者构造函数
-    public static boolean isConstructOrIsMemberVariableOrReturn(int firstLoc, int lastLoc, String filePath) {
+    public static boolean isConstructOrIsMemberVariable(int firstLoc, int lastLoc, String filePath) {
         flagConstruct = false;
         flagMember = false;
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);

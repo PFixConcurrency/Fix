@@ -73,7 +73,7 @@ public class Unicorn {
         if (status == 0) {
             return FixVerification.verifyByUnicorn(classpath);
         } else {
-         return false;//没编译成功，直接算错
+            return false;//没编译成功，直接算错
         }
 
 

@@ -1,8 +1,8 @@
 package fix.entity.type;
 
 public class AddSyncType {
-    //加this锁
-    public static int localSync = 0;
-    //加全局静态锁
-    public static int globalStaticSync = 1;
+    //长度3
+    public static int len3 = 0;
+    //长度4
+    public static int len4 = 1;
 }

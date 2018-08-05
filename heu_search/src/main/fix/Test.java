@@ -1,17 +1,13 @@
 package fix;
 
 import fix.analyzefile.UseASTAnalysisClass;
-import fix.entity.lock.ExistLock;
-import fix.run.Fix;
 import org.eclipse.jdt.core.dom.*;
-import p_heu.entity.ReadWriteNode;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
 
 public class Test {
 
@@ -37,7 +33,7 @@ public class Test {
         System.out.println(s.contains(3));*/
 //        useASTCFindLockLine("C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
         int poi = 11;
-        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(poi, 12, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
+        System.out.println(!UseASTAnalysisClass.isConstructOrIsMemberVariable(poi, 12, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples/exportExamples/atmoerror/BankAccount.java"));
     }
 
 

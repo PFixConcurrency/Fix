@@ -33,6 +33,7 @@ public class FixVerification {
 
             if (!seq.getResult()) {
                 verifyFlag = false;
+                return verifyFlag;
             }
 
         }
