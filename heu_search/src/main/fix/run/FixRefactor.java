@@ -8,6 +8,7 @@ import fix.entity.lock.ExistLock;
 import fix.entity.type.AddSyncType;
 import fix.io.ExamplesIO;
 import fix.io.InsertCode;
+import fix.io.MergePro;
 import p_heu.entity.ReadWriteNode;
 import p_heu.entity.pattern.Pattern;
 import p_heu.entity.sequence.Sequence;
@@ -27,8 +28,6 @@ public class FixRefactor {
     static ExamplesIO examplesIO = ExamplesIO.getInstance();
     static String firstDirPath = ImportPath.examplesRootPath + "/examples/" + ImportPath.projectName;//第一次修复的文件路径
     static String dirPath = "";//第一次修复的文件路径
-    //    static String dirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//第一次修复的文件路径
-    static String iterateDirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//迭代修复的文件路径
 
     static String whichCLassNeedSync = "";//需要添加同步的类，此处需不需考虑在不同类之间加锁的情况？
     static LockAdjust lockAdjust = LockAdjust.getInstance();//当锁交叉时，用来合并锁
@@ -66,12 +65,16 @@ public class FixRefactor {
     static int firstLoc = 0, lastLoc = 0;
 
     public static void main(String[] args) {
-
-        startUnicornTime = System.currentTimeMillis();
         try {
 
+            startUnicornTime = System.currentTimeMillis();
             //得到pattern
             acquirePatternList();
+
+            endUnicornTime = System.currentTimeMillis();
+            patternListTime = "time for getting pattern list : " + (endUnicornTime - startUnicornTime);
+            startFixTime = System.currentTimeMillis();
+
 
 //            System.out.println(patternList);
 //            Scanner sc = new Scanner(System.in);
@@ -255,11 +258,12 @@ public class FixRefactor {
             if (flagSameA && flagSameB && flagSameCross) {
                 //都在一个函数中
                 addSynchronizedOfFourLengthPattern(patternCounter.getNodes());
-            } else {//类似长度3
+            } else {
                 addSynchronized(threadA);
                 lockAdjust.setOneLockFinish(true);//表示第一次执行完
                 addSynchronized(threadB);
                 lockAdjust.adjust(addSyncFilePath);//合并锁
+                Propagate.p(LockPObject.lockName, threadA.get(0), sequence, sourceClassPath);
             }
 
         }
@@ -540,7 +544,9 @@ public class FixRefactor {
             }
         }
 
+        lockPolicyPopularize(analyseJavaPath, lockName);
     }
+
 
     //添加信号量修复顺序违背
     private static void addSignal(Pattern patternCounter) throws Exception {
@@ -793,5 +799,14 @@ public class FixRefactor {
 
         fixMethods += "Lock Name : " + result.trim() + '\n';
         return result.trim();
+    }
+
+    //关联变量
+    private static void lockPolicyPopularize(String analyseJavaPath, String lockName) {
+        LockPolicyPopularize.firstLoc = firstLoc;
+        LockPolicyPopularize.lastLoc = lastLoc;
+        LockPolicyPopularize.lockName = lockName;
+        LockPolicyPopularize.fixRelevantVar(analyseJavaPath);
+        MergePro.mergeLen4(analyseJavaPath, lockName);
     }
 }

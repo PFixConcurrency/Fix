@@ -66,7 +66,6 @@ public class AddLockAfterAcquireVariable {
         }*/
     }
 
-    //    public static void lock(String filePath) {//原来的删除了
     public static void lock(int firstLoc, int lastLoc, Set<String> relevantVariabSet, String lockName, String filePath) {
         //得到关联变量
         for (String s : relevantVariabSet)
@@ -190,10 +189,8 @@ public class AddLockAfterAcquireVariable {
 
         //是类的类型
         if (matchVariable.getSameFatherNode().getParent() instanceof TypeDeclaration) {
-            System.out.println("daozhe");
             return true;
         }
-        System.out.println("fouzedaozhe");
         return false;
     }
 
