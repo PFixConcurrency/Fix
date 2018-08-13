@@ -15,7 +15,7 @@ import java.util.Set;
 //加锁策略的推广
 //就是关联变量加同步
 public class LockPolicyPopularize {
-    static Set<String> relevantVariableSet = new HashSet<String>();
+    public static Set<String> relevantVariableSet = new HashSet<String>();
     public static int firstLoc = 0;
     public static int lastLoc = 0;
     public static String variableName = "";
@@ -28,7 +28,8 @@ public class LockPolicyPopularize {
 //        if (!(lockName.equals("this") || lockName.equals("objectFix"))) {
 //            return;
 //        }
-        acquireRekevantVar(firstLoc, lastLoc, filePath);
+
+//        acquireRekevantVar(firstLoc, lastLoc, filePath);
 
         /*System.out.println("关联变量");
         for (String s : relevantVariableSet) {

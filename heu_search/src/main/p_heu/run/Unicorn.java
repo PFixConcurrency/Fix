@@ -136,7 +136,7 @@ public class Unicorn {
                 double r1 = (double) o1.getSuccessCount() / (o1.getSuccessCount() + o1.getFailCount());
                 double r2 = (double) o2.getSuccessCount() / (o2.getSuccessCount() + o2.getFailCount());
                 return Double.compare(r1, r2) == 0 ?
-                        Integer.compare(o1.getFailCount(), o2.getFailCount()) : Double.compare(r1, r2);//changed
+                        -Integer.compare(o1.getFailCount(), o2.getFailCount()) : Double.compare(r1, r2);//changed
             }
         });
     }

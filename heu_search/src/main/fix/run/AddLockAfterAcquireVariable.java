@@ -1,10 +1,12 @@
 package fix.run;
 
 import fix.analyzefile.LockPolicyPopularize;
+import fix.analyzefile.UseASTAnalysisClass;
 import fix.entity.ImportPath;
 import fix.entity.MatchVariable;
 import fix.entity.type.RelevantVarLockLine;
 import fix.io.InsertCode;
+import fix.io.MergePro;
 import org.eclipse.jdt.core.dom.*;
 
 import java.io.BufferedReader;
@@ -21,6 +23,8 @@ public class AddLockAfterAcquireVariable {
     static Set<String> variableSet = new HashSet<String>();
     static String className = "";//类的名字，以后用来比较用
     static List<RelevantVarLockLine> relevantVarLockLineList = new ArrayList<RelevantVarLockLine>();
+
+    static Set numSet = new HashSet();
 
     //chanage file content to buffer array
     public static char[] getFileContents(File file) {
@@ -153,20 +157,43 @@ public class AddLockAfterAcquireVariable {
                                     int start = Integer.MAX_VALUE, end = 0;
                                     for (ASTNode nn : matchVariable.getMatchSet()) {
 
-                                        start = Math.min(cu.getLineNumber(nn.getStartPosition()),start);
-                                        end = Math.max(cu.getLineNumber(nn.getStartPosition() + nn.getLength()),end);
+                                        start = Math.min(cu.getLineNumber(nn.getStartPosition()), start);
+                                        end = Math.max(cu.getLineNumber(nn.getStartPosition() + nn.getLength()), end);
                                     }
 
+                                    //判断加锁会不会和for循环等交叉
+                                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(start, end, filePath);
+                                    start = lockLine.getFirstLoc();
+                                    end = lockLine.getLastLoc();
+
+                                    //检查会不会定义变量在锁内，使用变量在锁外
+                                    lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(start, end, filePath);
+                                    start = lockLine.getFirstLoc();
+                                    end = lockLine.getLastLoc();
+
                                     end++;
+
+
                                     if (!(start >= firstLoc && start <= lastLoc) || (end >= firstLoc && end <= lastLoc)) {
-                                        //加锁
-                                        InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
-                                        InsertCode.insert(end, " }", filePath);
+                                        if (numSet.contains(start) && numSet.contains(end)) {
+                                            //新加的锁包含在已加的锁里，直接不加
+                                        } else if (numSet.contains(start) && !numSet.contains(end)) {
+                                            //新加的锁与已加的锁交叉
+                                            merge1(start, end, lockName, filePath);
+                                        } else if (!numSet.contains(start) && numSet.contains(end)) {
+                                            merge2(start, end, lockName, filePath);
+                                        } else {
+                                            //加锁
+                                            InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
+                                            InsertCode.insert(end, " }", filePath);
 
-
-                                        //将数据放到list里面
-                                        RelevantVarLockLine r = new RelevantVarLockLine(start, end);
-                                        relevantVarLockLineList.add(r);
+                                            //将数据放到list里面
+                                            RelevantVarLockLine r = new RelevantVarLockLine(start, end);
+                                            relevantVarLockLineList.add(r);
+                                        }
+                                        for (int indexNum = start; indexNum <= end; indexNum++) {
+                                            numSet.add(indexNum);
+                                        }
                                     }
                                 }
 
@@ -181,6 +208,77 @@ public class AddLockAfterAcquireVariable {
                 return true;
             }
         });
+    }
+
+    private static void merge1(int start, int end, String lockName, String filePath) {
+        int oldStart = 0, oldEnd = 0;
+        end--;
+        boolean flagSearch = false;
+        int now = 0, last = 0;
+        List<Integer> list = new ArrayList<Integer>();
+        for (Object o : numSet) {
+            list.add((int) o);
+        }
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            //找到与其重合的
+            if (!flagSearch) {
+                now = list.get(i);
+                if (now >= start && now <= (end + 1)) {
+                    flagSearch = true;
+                    oldEnd = now;
+                }
+            } else {
+                last = list.get(i);
+                if ((now - last) != 1) {
+                    oldStart = last;
+                } else {
+                    now = last;
+                }
+            }
+        }
+
+        //只有一个
+        if (oldStart == 0)
+            oldStart = now;
+
+        start = Math.min(start, oldStart);
+        end = Math.max(end, oldEnd);
+        oldEnd--;
+        MergePro.merge(start, end, oldStart, oldEnd, lockName, filePath);
+    }
+
+    private static void merge2(int start, int end, String lockName, String filePath) {
+        int oldStart = 0, oldEnd = 0;
+        end--;
+        boolean flagSearch = false;
+        int now = 0, next = 0;
+        for (Object o : numSet) {
+            //找到与其重合的
+            if (!flagSearch) {
+                now = (int) o;
+                if (now >= start && now <= (end + 1)) {
+                    flagSearch = true;
+                    oldStart = now;
+                }
+            } else {
+                next = (int) o;
+                if ((next - now) != 1) {
+                    oldEnd = now;
+                } else {
+                    now = next;
+                }
+            }
+        }
+
+        //oldStart是最后一个元素
+        if (oldEnd == 0)
+            oldEnd = now;
+
+        start = Math.min(start, oldStart);
+        end = Math.max(end, oldEnd);
+
+        MergePro.merge(start, end, oldStart, oldEnd, lockName, filePath);
     }
 
     //检测是不是成员变量

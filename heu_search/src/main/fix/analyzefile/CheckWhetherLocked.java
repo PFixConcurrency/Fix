@@ -1,10 +1,15 @@
 package fix.analyzefile;
 
 import fix.entity.ImportPath;
+import fix.entity.LockPObject;
 import fix.listener.CheckWhetherLockedListener;
 import fix.listener.LockListener2;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
+import p_heu.entity.LockNode;
+import p_heu.entity.Node;
+import p_heu.entity.ReadWriteNode;
+import p_heu.entity.sequence.Sequence;
 
 public class CheckWhetherLocked {
 
@@ -13,9 +18,10 @@ public class CheckWhetherLocked {
     //要寻找的变量的位置,形式必须是   包名/java文件：行数1
     //"account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("atmoerror/BankAccount.java:11","total", ImportPath.examplesRootPath + "/out/production/Patch"));
+        System.out.println(check("atmoerror/BankAccount.java:11", "total", ImportPath.examplesRootPath + "/out/production/Patch"));
 //        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
+
     public static boolean check(String variableLoc, String variableName, String classpath) {
         String[] str = new String[]{
 //                "+classpath=" + ImportPath.examplesRootPath + "\\out\\production\\Patch",
@@ -43,6 +49,31 @@ public class CheckWhetherLocked {
 
 
         return flagUseJPFCheckWhetherLock;
+    }
+
+
+    public static boolean checkHasSync(ReadWriteNode rwn, Sequence sequence) {
+        if (LockPObject.element.equals("null")) {
+            return false;
+        }
+        String targetFile = rwn.getPosition().split(":")[0];
+        for (Node n : sequence.getNodes()) {
+            if (n instanceof ReadWriteNode) {
+                ReadWriteNode rw = (ReadWriteNode) n;
+                if (rw.equals(rwn)) {
+                    break;
+                }
+            }
+            if (n instanceof LockNode) {
+                LockNode ln = (LockNode) n;
+                String nowFile = ln.getLocation().split(":")[0];
+                if (ln.getLockElement().equals(LockPObject.element) && ln.getThread().equals(rwn.getThread()) &&
+                        ln.getAcqOrRel().equals("acq") && nowFile.equals(targetFile)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -1,46 +1,50 @@
 package fix;
 
 import fix.analyzefile.UseASTAnalysisClass;
+import fix.entity.ImportPath;
 import org.eclipse.jdt.core.dom.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
 
 public class Test {
 
 
-    public static void main(String[] args) {
-//        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
-//        System.out.println(CheckWhetherLocked.check("wrongLock/WrongLock.java:30", "value", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
-//        useASTChangeLine("D:/Patch/examples/wrongLock/wrongLock.java");
-        /*ReadWriteNode node = new ReadWriteNode(1,"accountsubtype.BusinessAccount@169","amount","READ","Thread-1","accountsubtype/PersonalAccount.java:11");
-        System.out.println(Fix.acquireLockName(node));*/
+    public static void main(String[] args) throws Exception {
 
-//        String read = "tmp = new MyListNode(x, p._current._next);";
+        /*BufferedReader br = null;
+        String read = "";//用来读
+        String result = "";//用来处理
+        int line = 0;
+        int poi = 7;
+        String filePath = ImportPath.examplesRootPath + "/exportExamples/" + "atmoerror/BankAccount.java";
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+        while (((read = br.readLine()) != null)) {
+            line++;
+            if (line == poi) {//找到哪一行
+                String field = "total";//得的变量
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + field + ").*$");
+                Matcher m = p.matcher(read);
+                if (m.matches()) {
+                    result = m.group(1);
+                    int indexTemp = result.lastIndexOf('.');
+                    if (indexTemp == -1) {
+                        result = "this";
+                    } else {
+                        result = result.substring(0, indexTemp);
+                    }
+                } else {
+                    result = "777";
+                }
+            }
+        }
 
-        /*Map<String, Integer> map = new HashMap<String, Integer>();
-        map.put("123",1);
-        map.put("123",1);*/
-       /* Set s = new HashSet();
-        s.add(1);
+        System.out.println(result);*/
+        Set s = new HashSet();
         s.add(1);
         s.add(2);
-        for(Object o : s)
-            System.out.println(o);
-        System.out.println(s.contains(3));*/
-//        useASTCFindLockLine("C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\exportExamples\\atmoerror\\BankAccount.java");
-
-        Set s = new HashSet();
-        s.add(100);
-        for(int i = 1;i < 4;i++)
-            s.add(i);
-        s.add(0);
-        s.add(1);
-        for(Object o : s)
-            System.out.println(o);
+        s.add(3);
 
     }
 
@@ -56,7 +60,7 @@ public class Test {
         cu.accept(new ASTVisitor() {
             @Override
             public boolean visit(FieldDeclaration node) {
-                System.out.println(node+ "===========");
+                System.out.println(node + "===========");
                 return super.visit(node);
             }
         });

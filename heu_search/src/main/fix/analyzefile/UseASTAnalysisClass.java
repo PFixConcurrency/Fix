@@ -2,6 +2,7 @@ package fix.analyzefile;
 
 import fix.entity.lock.ExistLock;
 import fix.io.ExamplesIO;
+import fix.run.Propagate;
 import org.eclipse.jdt.core.dom.*;
 import p_heu.entity.ReadWriteNode;
 
@@ -436,6 +437,32 @@ public class UseASTAnalysisClass {
         });
     }
 
+    public static void addPropagateSet(int line,String filePath) {
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+
+        cu.accept(new ASTVisitor() {
+
+            //变量
+            public boolean visit(SimpleName node) {
+                if (cu.getLineNumber(node.getStartPosition()) == line) {
+                    ASTNode parent = node.getParent();
+                    while(!(parent instanceof MethodDeclaration)){
+                        parent = parent.getParent();
+                    }
+                    int start = cu.getLineNumber(parent.getStartPosition());
+                    int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
+                    Propagate.addSet(start, end);
+                }
+                return true;
+            }
+        });
+    }
+
     //判断是不是成员变量
     private static boolean isMemberVariable(ASTNode node) {
         if (node.getParent().getParent() instanceof TypeDeclaration) {
@@ -487,6 +514,36 @@ public class UseASTAnalysisClass {
 
         });
         return flagInRun;
+    }
+
+    public static void useASTToaddVoli(String filePath) {
+        //读取文件
+        //因为会出现在类前面有一大堆注释的情况
+        //ast计算行数的时候会从注释开始算
+        BufferedReader br = null;
+        String read = "";
+        int index = 1;
+        String[] split = filePath.split("/");
+        String className = split[split.length - 1].split("\\.")[0];
+
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "GBK"));
+            while (((read = br.readLine()) != null)) {
+                if (read.contains("class") && read.contains(className)) {
+                    break;
+                } else {
+                    index++;
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ExamplesIO examplesIO = ExamplesIO.getInstance();
+        examplesIO.addVolatileDefine(index + 2, "volatile boolean flagFix = false;", filePath);
     }
 
     //表示加锁行数

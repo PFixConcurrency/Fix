@@ -1,3 +1,6 @@
+/**
+ * This file has been discarded
+ */
 package fix.run;
 
 import fix.analyzefile.*;

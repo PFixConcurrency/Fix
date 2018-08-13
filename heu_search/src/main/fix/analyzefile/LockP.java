@@ -4,6 +4,7 @@ import fix.entity.ImportPath;
 import fix.entity.LockNodeAndNum;
 import fix.entity.LockPObject;
 import fix.run.Fix;
+import fix.run.FixRefactor;
 import p_heu.entity.LockNode;
 import p_heu.entity.Node;
 import p_heu.entity.ReadWriteNode;
@@ -86,7 +87,7 @@ public class LockP {
                     ReadWriteNode rwn = (ReadWriteNode) n;
                     String javaFile = rwn.getPosition().split(":")[0];
                     if (rwn.getElement().equals(ln) && javaFile.equals(targetFile) && rwn.getThread().equals(readWriteNode.getThread())) {
-                        lockName = Fix.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
+                        lockName = FixRefactor.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
                     }
                 }
             }
@@ -139,6 +140,7 @@ public class LockP {
 
 //        System.out.println(ln + ":" + max);
 
+        //得到lockP
         String lockName = "";
         if (ln == null) {
             LockPObject.element = "null";
@@ -150,7 +152,7 @@ public class LockP {
                     ReadWriteNode rwn = (ReadWriteNode) n;
                     String javaFile = rwn.getPosition().split(":")[0];
                     if (rwn.getElement().equals(ln) && javaFile.equals(targetFile) && rwn.getThread().equals(readWriteNode.getThread())) {
-                        lockName = Fix.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
+                        lockName = FixRefactor.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
                     }
                 }
             }
@@ -162,7 +164,7 @@ public class LockP {
     private static void recorder(Map<String, Integer> mapLock, LockNode l) {
         Set set = mapLock.entrySet();
         Iterator it = set.iterator();
-        boolean flagHas = false;//
+        boolean flagHas = false;
         while (it.hasNext()) {
             Map.Entry mapEntry = (Map.Entry) it.next();
             if (mapEntry.getKey().equals(l.getLockElement())) {
@@ -203,13 +205,6 @@ public class LockP {
                         }
                     }
                 }
-                /*Set set = mapLock.entrySet();
-                Iterator it = set.iterator();
-                while (it.hasNext()) {
-                    Map.Entry mapEntry = (Map.Entry) it.next();
-                    System.out.println(mapEntry.getKey() + "," + mapEntry.getValue());
-
-                }*/
             }
         }
 
@@ -227,18 +222,19 @@ public class LockP {
 
         String lockName = "";
         if (ln == null) {
+            LockPObject.element = "null";
             return "null";
         } else {
+            LockPObject.element = ln;
             for (Node n : nodes) {
                 if (n instanceof ReadWriteNode) {
                     ReadWriteNode rwn = (ReadWriteNode) n;
                     String javaFile = rwn.getPosition().split(":")[0];
                     if (rwn.getElement().equals(ln) && javaFile.equals(targetFile) && rwn.getThread().equals(readWriteNode.getThread())) {
-                        lockName = Fix.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
+                        lockName = FixRefactor.acquireLockName(rwn, ImportPath.examplesRootPath + "/exportExamples/" + javaFile);
                     }
                 }
             }
-//System.out.println("this lock" + lockName);
 
             return lockName;
         }

@@ -41,8 +41,11 @@ public class Propagate {
                             adjustSyncScope(analyseJavaPath);
 
                             if (firstLoc > 0 && lastLoc > 0) {
+                                //已加的锁与新加的锁交叉
                                 if (numSet.contains(firstLoc - 1) || numSet.contains(lastLoc + 1)) {
                                     //修改合并
+                                    merge(lockName, analyseJavaPath);
+                                } else if (contians()) {//新加的锁包含已加的锁
                                     merge(lockName, analyseJavaPath);
                                 } else {
                                     //加锁
@@ -56,6 +59,17 @@ public class Propagate {
                 }
             }
         }
+    }
+
+    //检查是否新锁包含已加锁
+    private static boolean contians() {
+        for (Object o : numSet) {
+            int poi = (Integer) o;
+            if (poi >= firstLoc && poi <= (lastLoc + 1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //合并
@@ -87,9 +101,15 @@ public class Propagate {
 
         firstLoc = Math.min(firstLoc, oldStart);
         lastLoc = Math.max(lastLoc, oldEnd);
-//        System.out.println(firstLoc + "," + lastLoc + "," + oldStart + "," + oldEnd + ">>>>>");
-//        System.exit(-1);
+
         MergePro.merge(firstLoc, lastLoc, oldStart, oldEnd, lockName, analyseJavaPath);
+
+        //如合并完之后又与其他锁交叉，还需要合并
+        if (numSet.contains(lastLoc + 1)) {
+            MergePro.mergeFirstOrLast(analyseJavaPath, lastLoc + 1, 1);
+        } else if (numSet.contains(firstLoc)) {
+            MergePro.mergeFirstOrLast(analyseJavaPath, firstLoc, 0);
+        }
     }
 
     private static boolean hasSync(ReadWriteNode rwn, Sequence sequence, String sourceClassPath) {
