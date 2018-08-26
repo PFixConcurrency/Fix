@@ -1,6 +1,6 @@
 package soot.structure.entity;
 /*
-记录一个函数
+Record a function
  */
 public class Method {
 

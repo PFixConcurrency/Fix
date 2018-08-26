@@ -2,7 +2,7 @@ package fix.entity.lock;
 
 import java.util.Vector;
 
-//定义LockPath类，用来存放获取锁之后的执行序列
+//Defines the LockPath class to hold the execution sequence after the lock is acquired
 public class LocKSequence {
     public String lockName;
     public String threadName;
@@ -13,7 +13,7 @@ public class LocKSequence {
         this.threadName = threadName;
     }
 
-    //根据输入的name，检查当前的LockSequence是否是需要找的
+    //Depending on the name entered, check if the current LockSequence is to be found
     public boolean matchField(String fieldName){
         for(LockElement le : this.sequence){
             if(le.field.equals(fieldName))
@@ -34,12 +34,12 @@ public class LocKSequence {
             return false;
     }
 
-    //返回sequence里面所有的变量,去重
+    //Return all the variables in the sequence, and de-weight
     public Vector<String> fieldOnSameLock(){
         Vector<String> resultVector = new Vector<String>();
         for(LockElement le : this.sequence){
             if(!resultVector.contains(le.field)){
-                resultVector.add(le.field);//去重
+                resultVector.add(le.field);
             }
 
         }

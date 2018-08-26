@@ -15,15 +15,13 @@ import java.util.Vector;
 
 public class LockListener2 extends PropertyListenerAdapter {
 
-    public Vector<LocKSequence> lockVector = new Vector<LocKSequence>();//存放遇到的所有锁。
-    private String filePath;//要输出的文件的地址
-    private String fieldName;//要寻找的参数名一
-    private String fieldLoc;// 变量的具体位置一
-    //    private String fieldNameTwo;//要寻找的参数名二
-//    private String fieldLocTwo;// 变量的具体位置二
+    public Vector<LocKSequence> lockVector = new Vector<LocKSequence>();
+    private String filePath;
+    private String fieldName;
+    private String fieldLoc;
     private boolean checkFlag = false;
 
-    //此时正在保护共享变量的锁名
+
     private String protectLockName;
 
 
@@ -74,13 +72,13 @@ public class LockListener2 extends PropertyListenerAdapter {
 
     /* @Override
     public void objectUnlocked(VM vm, ThreadInfo currentThread, ElementInfo unlockedObject) {
-        for (int i = lockVector.size() - 1; i >= 0; i--) {//从后往前找
+        for (int i = lockVector.size() - 1; i >= 0; i--) {
             LocKSequence ls = lockVector.get(i);
-            //找到当前对应当前释放的锁
+
             if (ls.lockName.equals(unlockedObject.toString()) && currentThread.getName().equals(ls.threadName)) {
-                //寻找当前锁中有没有需要寻找的变量
+
                 for (LockElement le : ls.sequence) {
-                    //先检查有没变量
+
                     if (le.field.equals(fieldName) *//*&& le.location.equals(fieldLoc)*//*) {
                         System.out.println("*************" + le.toString());
                         System.out.println(lockVector.get(i).lockName);
@@ -90,7 +88,7 @@ public class LockListener2 extends PropertyListenerAdapter {
                     }
 
                 }
-                //清空当前释放锁里面的内容
+
                 lockVector.get(i).clearAll();
                 lockVector.remove(i);
             }

@@ -13,38 +13,7 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 
-        /*BufferedReader br = null;
-        String read = "";//用来读
-        String result = "";//用来处理
-        int line = 0;
-        int poi = 7;
-        String filePath = ImportPath.examplesRootPath + "/exportExamples/" + "atmoerror/BankAccount.java";
-        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
-        while (((read = br.readLine()) != null)) {
-            line++;
-            if (line == poi) {//找到哪一行
-                String field = "total";//得的变量
-                java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?(((\\w+\\.)+)" + field + ").*$");
-                Matcher m = p.matcher(read);
-                if (m.matches()) {
-                    result = m.group(1);
-                    int indexTemp = result.lastIndexOf('.');
-                    if (indexTemp == -1) {
-                        result = "this";
-                    } else {
-                        result = result.substring(0, indexTemp);
-                    }
-                } else {
-                    result = "777";
-                }
-            }
-        }
-
-        System.out.println(result);*/
-        Set s = new HashSet();
-        s.add(1);
-        s.add(2);
-        s.add(3);
+System.out.println(123);
 
     }
 
@@ -95,7 +64,7 @@ public class Test {
 
         cu.accept(new ASTVisitor() {
 
-            //在锁中，有哪些变量被定义了
+
             Set<String> varDefInSync = new HashSet<String>();
 
 
@@ -109,7 +78,7 @@ public class Test {
             public boolean visit(SimpleName node) {
 
 //                if(this.varDefInSync.contains(node.getIdentifier())){
-                System.out.println(node.getIdentifier());
+                System.out.println(node.toString());
                 System.out.println(cu.getLineNumber(node.getStartPosition()));
 //                }
                 return super.visit(node);

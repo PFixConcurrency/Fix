@@ -13,12 +13,11 @@ import p_heu.entity.sequence.Sequence;
 
 public class CheckWhetherLocked {
 
-    static boolean flagUseJPFCheckWhetherLock = false;//用jpf检测是否被加锁
+    static boolean flagUseJPFCheckWhetherLock = false;//jpf check whether has sync
 
-    //要寻找的变量的位置,形式必须是   包名/java文件：行数1
-    //"account/Account.java:32"
+    //The form has to be "account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("atmoerror/BankAccount.java:11", "total", ImportPath.examplesRootPath + "/out/production/Patch"));
+//        System.out.println(check("atmoerror/BankAccount.java:11", "total", ImportPath.examplesRootPath + "/out/production/Patch"));
 //        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
 
@@ -39,13 +38,13 @@ public class CheckWhetherLocked {
         jpf.run();
 //        System.out.println(checkWhetherLockedListener.isCheckFlag());
         flagUseJPFCheckWhetherLock = checkWhetherLockedListener.isCheckFlag();
-        //一个需要对clas文件处理
-        //一个对java文件处理
-        //因为jpf分析不出来synchronized (this) {
+        //One needs to process the clas file
+        //One for Java file processing
+        //because jpf can't analysesynchronized (this) {
         //                tmp = new MyListNode(x, p._current._next);
         //            }
-        //AST分析不出来synchronized 方法
-        //所以两种方法结合
+        //AST can't analyse synchronized Function
+        //so we combine
 
 
         return flagUseJPFCheckWhetherLock;

@@ -1,10 +1,10 @@
 package fix.entity.type;
 
-//表示修复的类型
+//Represents the type of fix
 public class FixType {
-    //表示第一次修复
+    //first fix
     public static int firstFix = 0;
 
-    //表示迭代修复
+    //second fix
     public static int iterateFix = 1;
 }

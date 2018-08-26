@@ -14,11 +14,11 @@ import java.util.*;
 public class Unicorn {
 
 
-    //修复所依赖的pattern
+    //pattern list
     static List<PatternCounter> patternCountersList = new ArrayList<>();
 
 
-    //测试用的main函数
+    //main for test
     public static void main(String[] args) {
 
 //        System.out.println(System.getProperty("user.dir"));
@@ -41,34 +41,19 @@ public class Unicorn {
             System.out.println(p);
         }
 
-        //获取sequence信息
+        //sequence information
         System.out.println(patternCounters.get(0).getFirstFailAppearPlace() + "sequence");*/
     }
 
-    //获取pattern
+    //get pattern
     public static List<PatternCounter> getPatternCounterList(String classpath) {
         useUnicorn(classpath);
         return patternCountersList;
     }
 
-    //获取验证结果
+    //test result
     public static boolean verifyFixSuccessful(String classpath) {
-        /*useUnicorn(UnicornType.verify, classpath);
-        //将拿到的pattern写入文件中
-        InsertCode.writeToFile(patternCountersList.toString(), ImportPath.examplesRootPath + "\\logFile\\" + ImportPath.projectName + "\\verify pattern.txt");
-        */
 
-
-//        Examin中的验证，但是在这不成功
-
-        //先将生成补丁后的程序编译成class文件
-        //因为jpf文件要对class文件处理
-        //架包路径一般可以为空，原来文件路径，目标路径
-        /*Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
-        Set<String> jars = new HashSet<String>();
-        GenerateClass.compile(jars.toArray(new String[jars.size()]),
-                files.toArray(new String[files.size()]),
-                classpath);*/
         int status = GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
         if (status == 0) {
             return FixVerification.verifyByUnicorn(classpath);
@@ -81,7 +66,7 @@ public class Unicorn {
 
     private static void useUnicorn(String classpath) {
         Pattern.setPatternSet("unicorn");
-        //将原来的清空
+        //clear out
         patternCountersList.clear();
 
         for (int i = 0; i < 100; ++i) {
@@ -108,10 +93,10 @@ public class Unicorn {
             jpf.run();
 
             Sequence seq = listener.getSequence();
-            //sequence中有时候会出现同一个线程对某个地方重复执行两次的情况
-            //我们只记录第二次，放弃第一次
-            //因为实际产生效果的是第二次
-            //jpf中产生这种情况的原因不明
+            //Sometimes, the same thread is executed twice in a sequence
+            //We only record the second time, give up the first time
+            //Because the actual effect is the second time
+            //The cause of this situation in JPF is unknown
             seq = reduceSeq(seq);
 
 

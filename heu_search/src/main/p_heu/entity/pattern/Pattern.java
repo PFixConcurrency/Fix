@@ -206,7 +206,7 @@ public class Pattern {
 	    if (pattern != null) {
 	        return pattern;
         }
-	    //检查pair1, pair2是否属于同一个实例却是同样两个线程的交互操作,切线程顺序相反
+	    //Check that pair1, pair2 belongs to the same instance but is an interaction between the same two threads, in the opposite order
 	    if (!pair1.isSameInstance(pair2)
                 && pair1.getFirst().getThread().equals(pair2.getLast().getThread())
                 && pair1.getLast().getThread().equals(pair2.getFirst().getThread())) {

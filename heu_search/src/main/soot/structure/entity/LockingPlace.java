@@ -1,7 +1,7 @@
 package soot.structure.entity;
 
 /*
-存储需要最终需要上锁的位置
+Storage requires the location where the lock is ultimately required
  */
 public class LockingPlace {
 

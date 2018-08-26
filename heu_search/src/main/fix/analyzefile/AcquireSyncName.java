@@ -11,7 +11,7 @@ import java.io.LineNumberReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//获取已有同步的名字
+//Gets the name of the existing synchronization
 public class AcquireSyncName {
 
 
@@ -33,10 +33,10 @@ public class AcquireSyncName {
         try {
             fileReader = new FileReader(new File(filepath));
             reader = new LineNumberReader(fileReader);
-//        number = 32;//设置指定行数
+//        number = 32;
             String txt = "";
             int lines = 0;
-            //锁
+            //sync
             int syncLine = 0;
             String syncName = "";
             while (txt != null) {
@@ -48,13 +48,9 @@ public class AcquireSyncName {
                     syncName = txt;
                 }
                 if (lines == existLock.getStartLine()) {
-//                System.out.println("第" + reader.getLineNumber() + "的内容是：" + txt + "\n");
-//                System.out.println("锁行数" + syncLine + ",锁信息" + syncName + "\n");
                     String lockName =  acquireName(syncName);
                     existLock.setLockName(lockName);
                     return existLock;
-//                long timeEnd = System.currentTimeMillis();
-//                System.out.println("总共花费：" + (timeEnd - timeStart) + "ms");
 
                 }
             }

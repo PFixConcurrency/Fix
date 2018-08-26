@@ -1,5 +1,5 @@
 package fix.entity.lock;
-//存放锁序列中的每一个变量
+//Store each variable in the lock sequence
 public class LockElement {
     public String instance;
     public String field;

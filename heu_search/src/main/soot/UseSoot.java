@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class UseSoot {
 
-    //单例模式
+    //singleton
     private static UseSoot useSoot = new UseSoot();
 
     private UseSoot() {
@@ -17,11 +17,11 @@ public class UseSoot {
         return useSoot;
     }
 
-    //加锁行数
+    //sync location
     private int minLine = Integer.MAX_VALUE;
     private int maxLine = 0;
 
-    //加锁的文件
+    //sync file
     private String syncJava = "";
 
     public int getMinLine() {
@@ -39,7 +39,7 @@ public class UseSoot {
     public static void main(String[] args) {
 //        ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
 //        ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");
-        //拿不到signature
+        //can't get the signature
         ReadWriteNode rw1 = new ReadWriteNode(1, "org.apache.commons.pool.impl.CursorableLinkedList$Listable@17d", "_next", "READ", "Thread-2", "org/apache/commons/pool/impl/CursorableLinkedList.java:976");
         ReadWriteNode rw2 = new ReadWriteNode(2, "org.apache.commons.pool.impl.CursorableLinkedList$Listable@17d", "_next", "WRITE", "Thread-1", "org/apache/commons/pool/impl/CursorableLinkedList.java:988");
         /*ReadWriteNode rw1 = new ReadWriteNode(1, "account2.Account@167", "Balance", "WRITE", "Thread-2", "buggyprogram/BuggyProgram.java:352");
@@ -52,9 +52,9 @@ public class UseSoot {
         System.out.println(useSoot.getSyncJava());
     }
 
-    //得到函数调用图
+    //get call graph
     public void getCallGraph(ReadWriteNode rw1, ReadWriteNode rw2) {
-        //处理数据
+        //deal with data
         String position = rw1.getPosition();
         String element = rw1.getElement();
         int index = element.indexOf('@');
@@ -70,7 +70,7 @@ public class UseSoot {
 
 //        System.out.println(classNameOne + "," + classLineOne + "," + classNameTwo + "," + classLineTwo);
 //        System.exit(-1);
-        //利用soot得到调用图
+        //get call graph based on soot
         Set<CommonCaller> callGraphInfo = Main.getCallGraphInfo(classNameOne, classLineOne, classNameTwo, classLineTwo);
 
 //        System.out.println(callGraphInfo);

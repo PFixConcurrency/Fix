@@ -6,12 +6,12 @@ import java.io.*;
 
 public class UseOldSyncToFix {
     public static void adjustOldSync(String lockName, int locStartLine, int locEndLine, int oldStartLine, int oldEndLine, String filePath) {
-        String tempFile = ImportPath.tempFile;//临时文件的目录，不用太在意，反正用完就删
-        FileToTempFile(lockName, locStartLine, locEndLine, oldStartLine, oldEndLine, filePath, tempFile);//将源文件修改后写入临时文件
-        TempFileToFile(filePath, tempFile);//从临时文件写入
-        deleteTempFile(tempFile);//删除临时文件
+        String tempFile = ImportPath.tempFile;//Temporary file directory, do not care too much, but delete after use
+        FileToTempFile(lockName, locStartLine, locEndLine, oldStartLine, oldEndLine, filePath, tempFile);//Writes the source file to the temporary file
+        TempFileToFile(filePath, tempFile);//Writes from a temporary file
+        deleteTempFile(tempFile);//Delete temporary file
     }
-    //原文件修改后写入临时文件
+    //The original file is modified and then written to the temporary file
     private static void FileToTempFile(String lockName, int locStartLine, int locEndLine, int oldStartLine, int oldEndLine, String filePath, String tempFile) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -22,7 +22,7 @@ public class UseOldSyncToFix {
             String read = "";
             while (((read = br.readLine()) != null)) {
                 line++;
-                //删除原有锁
+                //Delete the original lock
                 if (line == oldStartLine) {
                     int index = read.indexOf('{');
                     index++;
@@ -34,8 +34,8 @@ public class UseOldSyncToFix {
                     read = read.substring(index);
                 }
 
-                //修改锁位置锁
-                //位置一定要在删除锁后面
+                //Modify lock position
+                //The position must be behind the delete lock
                 if (line == locStartLine) {
                     StringBuilder sb = new StringBuilder(read);
                     sb.insert(0, "synchronized (" + lockName + "){ ");
@@ -65,7 +65,7 @@ public class UseOldSyncToFix {
         }
     }
 
-    //从临时文件将修改后的内容再写入原文件
+    //Writes the modified content from the temporary file to the original file
     private static void TempFileToFile(String filePath, String tempFile) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -92,7 +92,7 @@ public class UseOldSyncToFix {
         }
     }
 
-    //删除临时文件
+    //Delete temporary file
     private static void deleteTempFile(String tempFile) {
         File file = new File(tempFile);
         file.delete();

@@ -1,7 +1,7 @@
 package soot.structure.entity;
 
 /*
-寻找到的函数共同的调用函数和各自调用所在的行
+Find the function common call function and the line where the respective call is
  */
 public class CommonCaller {
 

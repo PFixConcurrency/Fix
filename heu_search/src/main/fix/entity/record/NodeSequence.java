@@ -3,14 +3,14 @@ package fix.entity.record;
 import java.util.ArrayList;
 import java.util.List;
 
-//这个类根据实例、变量、线程、地址来区分ReadWriteNode,
-//将id记录下来，表示同一个线程在同一行对同一个变量的执行顺序
+//This class differentiates ReadWriteNode by instance, variable, thread, and address
+//Record the id to indicate the order in which the same thread executes the same variable on the same line
 public class NodeSequence {
     private String element;
     private String field;
     private String position;
 
-    //记录原本ReadWriteNode的id
+    //Record the id of the original ReadWriteNode
     private List<Integer> idList = new ArrayList<Integer>();
 
 

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /*
-函数的调用者和调用发生的行
+The caller of the function and the row in which the call occurred
  */
 public class MethodCallRow{
 

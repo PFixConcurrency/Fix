@@ -31,25 +31,25 @@ public class Propagate {
                     int poi = Integer.parseInt(rwn.getPosition().split(":")[1]);
                     firstLoc = poi;
                     lastLoc = firstLoc;
-                    //这行没处理过
+                    //this line is not dealt with
                     if (!numSet.contains(poi)) {
                         String analyseJavaPath = ImportPath.examplesRootPath + "/exportExamples/" + rwn.getPosition().split(":")[0];
                         if (!hasSync(rwn, sequence, sourceClassPath) &&
                                 !UseASTAnalysisClass.isConstructOrIsMemberVariable(firstLoc, lastLoc + 1, analyseJavaPath)) {
 
-                            //调整锁的范围
+                            //adjust sync
                             adjustSyncScope(analyseJavaPath);
 
                             if (firstLoc > 0 && lastLoc > 0) {
-                                //已加的锁与新加的锁交叉
+                                //The lock that has been added crosses the lock that has been added
                                 if (numSet.contains(firstLoc - 1) || numSet.contains(lastLoc + 1)) {
-                                    //修改合并
+                                    //Changes and merge
                                     merge(lockName, analyseJavaPath);
-                                } else if (contians()) {//新加的锁包含已加的锁
+                                } else if (contians()) {//The new lock contains the added lock
                                     merge(lockName, analyseJavaPath);
                                 } else {
-                                    //加锁
-                                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);//待定
+                                    //add sync
+                                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, analyseJavaPath);
                                 }
                             }
                             addSet(firstLoc, lastLoc);
@@ -61,7 +61,7 @@ public class Propagate {
         }
     }
 
-    //检查是否新锁包含已加锁
+    //Check that the new lock contains the locked
     private static boolean contians() {
         for (Object o : numSet) {
             int poi = (Integer) o;
@@ -72,13 +72,13 @@ public class Propagate {
         return false;
     }
 
-    //合并
+    //merge
     private static void merge(String lockName, String analyseJavaPath) {
         int oldStart = 0, oldEnd = 0;
         boolean flagSearch = false;
         int now = 0, next = 0;
         for (Object o : numSet) {
-            //找到与其重合的
+            //find overlap
             if (!flagSearch) {
                 now = (int) o;
                 if (now >= firstLoc && now <= (lastLoc + 1)) {
@@ -95,7 +95,7 @@ public class Propagate {
             }
         }
 
-        //oldStart是最后一个元素
+        //oldStart is last element
         if (oldEnd == 0)
             oldEnd = now;
 
@@ -104,7 +104,7 @@ public class Propagate {
 
         MergePro.merge(firstLoc, lastLoc, oldStart, oldEnd, lockName, analyseJavaPath);
 
-        //如合并完之后又与其他锁交叉，还需要合并
+        //If the combination is completed and then interlocks with other locks, a merge is required
         if (numSet.contains(lastLoc + 1)) {
             MergePro.mergeFirstOrLast(analyseJavaPath, lastLoc + 1, 1);
         } else if (numSet.contains(firstLoc)) {
@@ -143,21 +143,21 @@ public class Propagate {
         numSet.add(poi);
     }
 
-    //更改锁的范围
+    //adjust sync
     private static void adjustSyncScope(String analyseJavaPath) {
 
-        //判断加锁会不会和for循环等交叉
+        //Determine if the lock will cross the for loop, etc
         UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, analyseJavaPath);
         firstLoc = lockLine.getFirstLoc();
         lastLoc = lockLine.getLastLoc();
 
-        //检查会不会定义变量在锁内，使用变量在锁外
+        //Will the variable be defined inside the lock and used outside
         lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(firstLoc, lastLoc, analyseJavaPath);
         firstLoc = lockLine.getFirstLoc();
         lastLoc = lockLine.getLastLoc();
     }
 
-    //清空
+    //clear out
     public static void clearSet() {
         numSet.clear();
     }

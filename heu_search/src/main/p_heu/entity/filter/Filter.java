@@ -25,7 +25,7 @@ public class Filter {
     public static Filter createFilePathFilter() {
         String systemType = System.getProperty("os.name");
         if (systemType.contains("Mac")) {
-            //在main文件夹下和test文件夹下调用，user.dir的属性，因此需要检查并修改path的值使之始终保持一致
+            //The main and test folders are marked down with user.dir properties, so you need to check and change the value of path to be consistent
             String path = System.getProperty("user.dir");
 
             if (!path.endsWith("src")) {
@@ -66,7 +66,7 @@ public class Filter {
             return new Filter(regex);
         }
         else if (systemType.contains("Windows")) {
-            //在main文件夹下和test文件夹下调用，user.dir的属性，因此需要检查并修改path的值使之始终保持一致
+            //The main and test folders are marked down with user.dir properties, so you need to check and change the value of path to be consistent
             String path = System.getProperty("user.dir");
 
             if (!path.endsWith("src")) {

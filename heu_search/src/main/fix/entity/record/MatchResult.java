@@ -1,8 +1,8 @@
 package fix.entity.record;
 
 public class MatchResult {
-    boolean flag = false;//表示是否匹配
-    int index = -1;//表示是第几个匹配
+    boolean flag = false;//whether match
+    int index = -1;//which one match
 
     public void setFlag(boolean flag) {
         this.flag = flag;

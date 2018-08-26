@@ -9,13 +9,13 @@ import p_heu.entity.sequence.Sequence;
 import java.util.ArrayList;
 import java.util.List;
 
-//这个类对Sequence操作
+//operate sequence
 public class RecordSequence {
 
-    //存放所有的NodeSequence
+    //Store all NodeSequence
     static List<NodeSequence> nodeSequenceList = new ArrayList<NodeSequence>();
 
-    //所有读写节点
+    //All read-write nodes
     static List<ReadWriteNode> readWriteNodeList = new ArrayList<ReadWriteNode>();
 
     public static List<NodeSequence> getNodeSequenceList() {
@@ -35,7 +35,6 @@ public class RecordSequence {
     }
 
     public static void display(Sequence firstFailAppearPlace) {
-//        System.out.println("nodes信息");
         List<Node> nodesList = firstFailAppearPlace.getNodes();
         for (Node node : nodesList) {
             if (node instanceof ReadWriteNode) {
@@ -50,17 +49,15 @@ public class RecordSequence {
 
 //        System.exit(-1);
 
-        //得到所有readwritenode信息，这里
-        //只为了关联变量考虑，其实还可以优化
-        //比如将读写节点和后面的分类结合
+
         analyseReadWriteNodeList(nodesList);
 
     }
 
-    //将sequence里面的数据，按照线程和行数分类
+    //Sort the data in your sequence by thread and number of rows
     private static void divideNodes(ReadWriteNode node) {
         NodeSequence nodeSequence = new NodeSequence(node.getElement(), node.getField(), node.getPosition());
-        //先判断list中有没有，没有，则添加，有，直接找到有的那个，在它的arr里面添加
+        //So let's see if there's any in the list, no, add, there's, find the one, add it in its arr
         MatchResult mr = listMatch(nodeSequence);
         if (mr.isFlag()) {
             nodeSequenceList.get(mr.getIndex()).add(node.getId());
@@ -82,7 +79,7 @@ public class RecordSequence {
         return matchResult;
     }
 
-    //是不是原来语句最后一次操作
+    //Is not the last operation of the original statement
     public static boolean isLast(ReadWriteNode readWriteNode) {
         for (int i = 0; i < nodeSequenceList.size(); i++) {
             NodeSequence nodeS = nodeSequenceList.get(i);
@@ -95,7 +92,7 @@ public class RecordSequence {
         return false;
     }
 
-    //是不是原来语句第一次操作
+    //Is not the first operation of the original statement
     public static boolean isFirst(ReadWriteNode readWriteNode) {
         for (int i = 0; i < nodeSequenceList.size(); i++) {
             NodeSequence nodeS = nodeSequenceList.get(i);

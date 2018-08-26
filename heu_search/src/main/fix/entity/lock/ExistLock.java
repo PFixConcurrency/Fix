@@ -1,10 +1,10 @@
 package fix.entity.lock;
 
-//用来表示程序中原有的锁
+//Used to represent the original lock in a program
 public class ExistLock {
-    String lockName = "";//锁名
-    int startLine = 0;//加锁开始行
-    int endLine = 0;//加锁结束行
+    String lockName = "";
+    int startLine = 0;
+    int endLine = 0;
 
     public String getLockName() {
         return lockName;

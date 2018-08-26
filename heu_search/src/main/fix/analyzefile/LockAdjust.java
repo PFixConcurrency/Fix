@@ -4,9 +4,9 @@ import fix.entity.ImportPath;
 
 import java.io.*;
 
-//在添加两个同步的时候，万一两个同步交叉，要合并
+//When adding two synchronization, if corss,need to merge
 public class LockAdjust {
-    //单例
+    //singleton
     private static LockAdjust instance = new LockAdjust();
 
     private LockAdjust() {
@@ -17,15 +17,15 @@ public class LockAdjust {
         return instance;
     }
 
-    String oneLockFile = "";//第一次加锁的文件
-    String oneLockName = "";//第一次加锁的名称
-    int oneFirstLoc = 0;//第一次加锁位置
-    int oneLastLoc = 0;//第一次加锁位置
+    String oneLockFile = "";
+    String oneLockName = "";
+    int oneFirstLoc = 0;
+    int oneLastLoc = 0;
 
-    String twoLockFile = "";//第二次加锁的文件
-    String twoLockName = "";//第二次加锁名称
-    int twoFirstLoc = 0;//第二次加锁位置
-    int twoLastLoc = 0;//第二次加锁位置
+    String twoLockFile = "";
+    String twoLockName = "";
+    int twoFirstLoc = 0;
+    int twoLastLoc = 0;
 
     public String getOneLockName() {
         return oneLockName;
@@ -43,10 +43,11 @@ public class LockAdjust {
         this.twoLockName = twoLockName;
     }
 
-    boolean oneLockFinish = false;//第一次加锁是否完成
+    boolean oneLockFinish = false;//Is the first lock finished
 
-    int finalFirstLoc = 0;//合并后的位置
-    int finalLastLoc = 0;//合并后的位置
+    //location after merging
+    int finalFirstLoc = 0;
+    int finalLastLoc = 0;
 
     public String getOneLockFile() {
         return oneLockFile;
@@ -133,16 +134,16 @@ public class LockAdjust {
 
     public void adjust(String filePath) {
 //        System.out.println(oneFirstLoc + "," + oneLastLoc + "," + twoFirstLoc +"," + twoLastLoc + cross() +  "=================================");
-        //后来我仔细想了想，不管锁是不是相同都要合并
-        //只有在同一个文件里面加锁才能合并，都不同类了也不需要合并了
-            if (cross() && oneLockFile.equals(twoLockFile)) {//如果交叉需要合并
-                if (lastEqualFirst()) {//判断某次加锁终止行是不是和另一次加锁起始行相等
-                    adjustOldSync(filePath, 1);//修改原有的锁
+        //Merge regardless of whether the lock is the same or not
+        //Only lock in the same file can be merged
+            if (cross() && oneLockFile.equals(twoLockFile)) {//If cross, needs to merge
+                if (lastEqualFirst()) {//If one lock stop row is the same as another lock start row
+                    adjustOldSync(filePath, 1);//Modify the old lock
                 } else {
                     finalFirstLoc = Math.min(oneFirstLoc, twoFirstLoc);
                     finalLastLoc = Math.max(oneLastLoc, twoLastLoc);
-                    //删除原有锁，然后添加新的合并锁
-                    adjustOldSync(filePath, 0);//0表示合并锁，1表示移动锁
+                    //Remove the original sync and then add a new merge sync
+                    adjustOldSync(filePath, 0);//0 merge sync，1 move sync
                 }
                 LockPolicyPopularize.firstLoc = finalFirstLoc;
                 LockPolicyPopularize.lastLoc = finalLastLoc;
@@ -152,18 +153,16 @@ public class LockAdjust {
 //        }
     }
 
-    //删除原有锁
-    //第二个参数表示执行哪个操作
-    //0表示合并锁
-    //1表示移动锁
+    //delete old sync
+    //operation type
     private void adjustOldSync(String filePath, int type) {
-        String tempFile = ImportPath.tempFile;//临时文件的目录，不用太在意，反正用完就删
-        FileToTempFile(filePath, tempFile, type);//将源文件修改后写入临时文件
-        TempFileToFile(filePath, tempFile);//从临时文件写入
-        deleteTempFile(tempFile);//删除临时文件
+        String tempFile = ImportPath.tempFile;//Temporary file directory, do not care too much, delete after we use.
+        FileToTempFile(filePath, tempFile, type);//Writes the source file to the temporary file
+        TempFileToFile(filePath, tempFile);//Writes from a temporary file
+        deleteTempFile(tempFile);//Delete temporary file
     }
 
-    //原文件修改后写入临时文件
+    //The original file is modified and then written to the temporary file
     private void FileToTempFile(String filePath, String tempFile, int type) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -174,9 +173,9 @@ public class LockAdjust {
             String read = "";
             while (((read = br.readLine()) != null)) {
                 line++;
-                //执行合并锁操作
+                //Perform the merge lock operation
                 if (type == 0) {
-                    //删除第一个锁
+                    //Remove the first lock
                     if (line == oneFirstLoc) {
                         int index = read.indexOf('{');
                         index++;
@@ -188,7 +187,7 @@ public class LockAdjust {
                         read = read.substring(index);
                     }
 
-                    //删除第二个锁
+                    //Remove the second lock
                     if (line == twoFirstLoc) {
                         int index = read.indexOf('{');
                         index++;
@@ -200,8 +199,8 @@ public class LockAdjust {
                         read = read.substring(index);
                     }
 
-                    //添加合并后的锁
-                    //位置一定要在删除锁后面
+                    //Add the combined lock
+                    //The position must be behind the delete lock
                     if (line == finalFirstLoc) {
                         StringBuilder sb = new StringBuilder(read);
                         sb.insert(0, "synchronized (" + oneLockName + "){ ");
@@ -212,28 +211,28 @@ public class LockAdjust {
                         sb.insert(0, "}");
                         read = sb.toString();
                     }
-                } else if (type == 1) {//执行移动锁操作
-                    int equalLineNumber = 0;//相等行号
-                    if (oneLastLoc == twoFirstLoc) {//1和2靠着
+                } else if (type == 1) {//Perform the move sync operation
+                    int equalLineNumber = 0;//equal line numbers
+                    if (oneLastLoc == twoFirstLoc) {
                         equalLineNumber = twoFirstLoc;
-                    } else if (twoLastLoc == oneFirstLoc) {//2和1靠着
+                    } else if (twoLastLoc == oneFirstLoc) {
                         equalLineNumber = oneFirstLoc;
                     }
                     if (line == equalLineNumber) {
-                        //这段代码原来的逻辑是这样
-                        //如果相邻两行加锁，则加它们修改一下，避免出现第二次加锁的左括号和第一次加锁的右括号重合
-                        /*int index = read.indexOf('}');//找到上个加锁的右括号
-                        read = read.substring(0, index) + read.substring(index + 1);//删除右括号
+                        //The original logic of this code looks like this
+                        //If the two adjacent lines are locked, modify them to avoid the overlap between the open bracket of the second lock and the right bracket of the first lock
+                        /*int index = read.indexOf('}');//Find the last locked close bracket
+                        read = read.substring(0, index) + read.substring(index + 1);//Remove the close bracket
                         StringBuilder sb = new StringBuilder(read);
-                        sb.insert(0, '}');//在行首添加一个右括号
+                        sb.insert(0, '}');//Add a close bracket at the top of the line
                         read = sb.toString();*/
 
-                        //但是现在，在运行even程序的时候，发现将相邻的加锁两行合并才好
-                        //所以改成了这样，直接删除
+                        //However, it turns out that merging two adjacent locked rows is a good idea(even)
+                        //So I just delete it
                         String syncStr = "synchronized (" + oneLockName + "){ ";
                         read = read.replace(syncStr, "");
-                        int index = read.indexOf('}');//找到上个加锁的右括号
-                        read = read.substring(index + 1);//直接把这部分都删了
+                        int index = read.indexOf('}');//Find the last locked close bracket
+                        read = read.substring(index + 1);//delete
                     }
                 }
 
@@ -255,7 +254,7 @@ public class LockAdjust {
         }
     }
 
-    //从临时文件将修改后的内容再写入原文件
+    //Writes the modified content from the temporary file to the original file
     private void TempFileToFile(String filePath, String tempFile) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -282,15 +281,14 @@ public class LockAdjust {
         }
     }
 
-    //删除临时文件
     private void deleteTempFile(String tempFile) {
         File file = new File(tempFile);
         file.delete();
     }
 
-    //判断是不是交叉
+    //Decide if it's a cross
     private boolean cross() {
-        //先找不交叉的情况
+        //Find the uncrossed case
         if (oneFirstLoc > twoLastLoc) {
             return false;
         }
@@ -300,7 +298,7 @@ public class LockAdjust {
         return true;
     }
 
-    //判断加锁终止行是不是和另一次加锁起始行相等
+    //Determines whether the locked end row is equal to the start row of another lock
     private boolean lastEqualFirst() {
         if (oneLastLoc == twoFirstLoc) {
             return true;

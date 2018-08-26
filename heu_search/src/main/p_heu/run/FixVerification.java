@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class FixVerification {
 
-    //”√unicorn—È÷§≤π∂°
+    //unicorn test
     public static boolean verifyByUnicorn(String classpath) {
         boolean verifyFlag = true;
         Pattern.setPatternSet("unicorn");

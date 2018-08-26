@@ -2,10 +2,10 @@ package fix.entity;
 
 import fix.io.ExamplesIO;
 
-//这个类表示的是添加的全局共享变量
-//借助它来修复长度为4的pattern
+//This class represents the added global Shared variable
+
 public class GlobalStaticObject {
-    //单例
+    //singleton
     private static GlobalStaticObject globalStaticObject = new GlobalStaticObject();
     private GlobalStaticObject() {
     }
@@ -17,8 +17,8 @@ public class GlobalStaticObject {
 
     public static boolean isDefineObject = false;
 
-    //在跨类搜索中记录方法名称
-    public static String leftMethodName = "";//方法一的名称
+    //Record the method name in cross function search
+    public static String leftMethodName = "";//function one name
 
-    public static String rightMethodName = "";//方法二的名称
+    public static String rightMethodName = "";//function two name
 }

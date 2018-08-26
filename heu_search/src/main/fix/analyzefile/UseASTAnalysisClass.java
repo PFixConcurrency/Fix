@@ -13,27 +13,27 @@ import java.util.Set;
 
 public class UseASTAnalysisClass {
 
-    static String className = "";//类的名字，以后用来比较用
-    static boolean flagMember = false;//是不是成员变量
-    static boolean flagConstruct = false;//是不是构造函数
+    static String className = "";
+    static boolean flagMember = false;//Is it a member variable
+    static boolean flagConstruct = false;//In the constructor or not
 
-    static boolean rw1Match = false;//第一个读写点有没有匹配
-    static boolean rw2Match = false;//第二个读写点有没有匹配
+    static boolean rw1Match = false;//whether The first read-write point match
+    static boolean rw2Match = false;//whether The second read-write point match
 
-    static ASTNode rw1Node = null;//匹配第一个读写点
-    static ASTNode rw2Node = null;//匹配第二个读写点
+    static ASTNode rw1Node = null;//Match the first read-write point
+    static ASTNode rw2Node = null;//Match the second read-write point
 
-    static boolean flagSameFunction = false;//是不是在一个函数中
+    static boolean flagSameFunction = false;//whether in same function
 
-    static LockLine lockLine = new LockLine();//用来记录加锁的起始和终止行数
+    static LockLine lockLine = new LockLine();//Used to record the number of start and end rows for sync
 
-    static ExistLock existLock = new ExistLock();//用来记录已有的sync块所在的行数，最后根据它获取锁的名称
+    static ExistLock existLock = new ExistLock();//This is used to record the number of rows in an existing sync block, and finally get the name of the lock based on it
 
-    private static String objectName;//加的静态变量的名称
+    private static String objectName;//The name of the added static variable
 
     static boolean flagInRun = false;
 
-    static boolean flagField = false;//表示是不是变量定义
+    static boolean flagField = false;//whether variable definition
 
 
     public static void main(String[] args) {
@@ -60,9 +60,7 @@ public class UseASTAnalysisClass {
         System.out.println(UseASTAnalysisClass.checkInRun(39, 40, "C:\\Users\\lhr\\Desktop\\pfix\\FixExamples\\examples\\airline\\Bug.java"));
     }
 
-    //判断变量是不是在if(),while(),for()的判断中
-    //注意是判断中，就是圆括号中
-    //如果是的话，要稍微修改一下加锁的函数
+    //Whether the variable is in the judgment of if(),while(),for()
     public static LockLine changeLockLine(int firstLoc, int lastLoc, String filePath) {
 //        System.out.println(firstLoc + "===========");
         lockLine.setFirstLoc(firstLoc);
@@ -71,16 +69,16 @@ public class UseASTAnalysisClass {
         return lockLine;
     }
 
-    //判断是不是成员变量或者构造函数
+    //Determines whether it is a member variable or a constructor
     public static boolean isConstructOrIsMemberVariable(int firstLoc, int lastLoc, String filePath) {
-        //每次都需要重置
+        //It needs to be reset every time
         flagConstruct = false;
         flagMember = false;
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
         return flagConstruct || flagMember;
     }
 
-    //利用AST来检查加锁之后，会不会出现变量定义在锁内，但是变量使用在锁歪的情况
+    //Will the variable be defined in the sync, but the variable iused outside
     public static LockLine useASTCheckVariableInLock(int lockStart, int locEnd, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -93,10 +91,10 @@ public class UseASTAnalysisClass {
 
         cu.accept(new ASTVisitor() {
 
-            //在锁中，有哪些变量被定义了
+            //In the lock, what are the variables are defined
             Set<String> varDefInSync = new HashSet<String>();
 
-            //函数结束的行数
+            //The number of lines at the end of the function
             int functionEnd = 0;
 
             @Override
@@ -128,7 +126,7 @@ public class UseASTAnalysisClass {
         return lockLine;
     }
 
-    //利用AST将添加的对象同步与原来的this同步合并
+    //Use the AST to synchronize the added objects with the original this synchronization
     public static LockLine useASTAdjustThisLock(int firstLoc, int lastLoc, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -145,11 +143,11 @@ public class UseASTAnalysisClass {
                 int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
 
                 boolean flagCross = true;
-                //先找不交叉的情况
+                //Find the uncrossed case
                 if (firstLoc > end || lastLoc < start) {
                     flagCross = false;
                 }
-                //交叉需要改变行数
+                //cross need to change line
                 if (flagCross) {
                     lockLine.setFirstLoc(Math.min(firstLoc, start));
                     lockLine.setLastLoc(Math.max(lastLoc, end));
@@ -161,11 +159,11 @@ public class UseASTAnalysisClass {
         return lockLine;
     }
 
-    //利用AST来添加全局静态变量，用于加全局锁
+    //Use AST to add global static variables for adding global locks
     public static String useASTToaddStaticObject(String filePath) {
-        //读取文件
-        //因为会出现在类前面有一大堆注释的情况
-        //ast计算行数的时候会从注释开始算
+        //read file
+        //Because it's going to have a bunch of comments in front of the class
+        //When the ast calculates the number of rows, it starts with the comment
         BufferedReader br = null;
         String read = "";
         int index = 1;
@@ -215,7 +213,7 @@ public class UseASTAnalysisClass {
         return objectName;
     }
 
-    //利用AST来寻找加锁的行数
+    //Use AST to find the line number of sync
     public static ExistLock useASTCFindLockLine(ReadWriteNode readWriteNode, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -246,7 +244,7 @@ public class UseASTAnalysisClass {
         return existLock;
     }
 
-    //利用AST来改变加锁位置
+    //Use AST to change the sync position
     public static void useASTChangeLine(int firstLoc, int lastLoc, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -264,7 +262,7 @@ public class UseASTAnalysisClass {
                 int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
                 if ((firstLoc <= start && (lastLoc + 1) <= end && (lastLoc + 1) > start) || (firstLoc > start && firstLoc <= end && (lastLoc + 1) > end)) {//加锁区域与代码块交叉的里面
                     lockLine.setFirstLoc(Math.min(firstLoc, start));
-                    lockLine.setLastLoc(Math.max(lastLoc, end));//此处lastloc不要加1，因为加锁的时候已经是+1了
+                    lockLine.setLastLoc(Math.max(lastLoc, end));//Do not add 1 to lastloc because it is +1 when we lock it
                 }
                 return super.visit(node);
             }
@@ -273,9 +271,9 @@ public class UseASTAnalysisClass {
             public boolean visit(SwitchStatement node) {
                 int start = cu.getLineNumber(node.getStartPosition());
                 int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
-                if ((firstLoc >= start && firstLoc <= end) || (((lastLoc + 1) >= start && (lastLoc + 1) <= end))) {//此处与if语句等情况稍微有一些不同
+                if ((firstLoc >= start && firstLoc <= end) || (((lastLoc + 1) >= start && (lastLoc + 1) <= end))) {//This is slightly different from the case of an if statement and so on
                     lockLine.setFirstLoc(Math.min(firstLoc, start));
-                    lockLine.setLastLoc(Math.max(lastLoc, end));//此处lastloc不要加1，因为加锁的时候已经是+1了
+                    lockLine.setLastLoc(Math.max(lastLoc, end));//Do not add 1 to lastloc because it is +1 when we lock it
                 }
                 return super.visit(node);
             }
@@ -283,7 +281,7 @@ public class UseASTAnalysisClass {
     }
 
 
-    //是不是定义的位置
+    //Is it a defined position
     public static boolean useASTCheckDec(ReadWriteNode readWriteNode, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -295,7 +293,7 @@ public class UseASTAnalysisClass {
         cu.accept(new ASTVisitor() {
             @Override
             public boolean visit(FieldDeclaration node) {
-                //比较行数相同即可，无需再比较变量名称
+                //we compare the same number of rows without comparing the variable names
                 if(cu.getLineNumber(node.getStartPosition()) == Integer.parseInt(readWriteNode.getPosition().split(":")[1])){
                     flagField = true;
 
@@ -307,17 +305,16 @@ public class UseASTAnalysisClass {
         return flagField;
     }
 
-    //是不是在一个函数中
+    //whether same function
     public static boolean assertSameFunction(List<ReadWriteNode> nodesList, String filePath) {
         ReadWriteNode rwn1 = nodesList.get(0);
         ReadWriteNode rwn2 = nodesList.get(1);
 
-        //判断是不是在一个函数中
         useASTAssertSameFun(rwn1, rwn2, filePath);
         return flagSameFunction;
     }
 
-    //用AST来判别是不是在一个函数中
+    //use AST to check whether same function
     private static void useASTAssertSameFun(ReadWriteNode rwn1, ReadWriteNode rwn2, String filePath) {
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -332,13 +329,13 @@ public class UseASTAnalysisClass {
                 return true;
             }
 
-            //定义变量
+            //define variable
             public boolean visit(VariableDeclarationFragment node) {
 
                 return true;
             }
 
-            //变量
+            //variable
             public boolean visit(SimpleName node) {
 
                 if (node.toString().equals(rwn1.getField()) && cu.getLineNumber(node.getStartPosition()) == Integer.parseInt(rwn1.getPosition().split(":")[1])) {
@@ -350,7 +347,7 @@ public class UseASTAnalysisClass {
                     rw2Node = node;
                 }
 
-                if (rw1Match && rw2Match) {//两个读写点都找到的时候
+                if (rw1Match && rw2Match) {//When both read-write points are found
                     flagSameFunction = isSameFunction(rw1Node, rw2Node);
                 }
                 return true;
@@ -358,14 +355,14 @@ public class UseASTAnalysisClass {
         });
     }
 
-    //判断两个结点是不是在一个函数中
+    //whether two nodes in samefunction
     private static boolean isSameFunction(ASTNode rw1Node, ASTNode rw2Node) {
-        //找到第一个结点在哪个函数中
+        //Find which function the first node is in
         ASTNode iNode = rw1Node.getParent();
         while (!(iNode instanceof MethodDeclaration)) {
             iNode = iNode.getParent();
         }
-        //找到第二个结点在哪个函数中
+        //Find which function the second node is in
         ASTNode jNode = rw2Node.getParent();
         while (!(jNode instanceof MethodDeclaration)) {
             jNode = jNode.getParent();
@@ -377,7 +374,7 @@ public class UseASTAnalysisClass {
         }
     }
 
-    //将文件处理成buffer array
+    //The file is processed into buffer array
     public static char[] getFileContents(File file) {
         // char array to store the file contents in
         char[] contents = null;
@@ -386,7 +383,7 @@ public class UseASTAnalysisClass {
             StringBuffer sb = new StringBuffer();
             String line = "";
             while ((line = br.readLine()) != null) {
-                // 附加内容和丢失的新行。
+                // Additional content and missing new lines.
                 sb.append(line + "\n");
             }
             contents = new char[sb.length()];
@@ -417,9 +414,9 @@ public class UseASTAnalysisClass {
                 return true;
             }
 
-            //定义变量
+            //define variabnle
             public boolean visit(VariableDeclarationFragment node) {
-                //判断是不是成员变量
+                //check whether member varibale
                 if (cu.getLineNumber(node.getStartPosition()) >= firstLoc && cu.getLineNumber(node.getStartPosition()) <= lastLoc) {
                     flagMember = isMemberVariable(node);
                 }
@@ -427,7 +424,7 @@ public class UseASTAnalysisClass {
                 return true;
             }
 
-            //变量
+            //variable
             public boolean visit(SimpleName node) {
                 if (cu.getLineNumber(node.getStartPosition()) >= firstLoc && cu.getLineNumber(node.getStartPosition()) <= lastLoc) {
                     flagConstruct = isConstruct(node);
@@ -463,7 +460,7 @@ public class UseASTAnalysisClass {
         });
     }
 
-    //判断是不是成员变量
+    //whether member variable
     private static boolean isMemberVariable(ASTNode node) {
         if (node.getParent().getParent() instanceof TypeDeclaration) {
             return true;
@@ -472,14 +469,14 @@ public class UseASTAnalysisClass {
         }
     }
 
-    //判断是不是构造函数
+    //whether construct
     private static boolean isConstruct(ASTNode node) {
         /**
-         * 检查结点的所有父节点，看看有没有一个是构造函数
-         * 判断节点类型是函数，节点名字与类名相同，则是构造函数
+         * Check all the parent nodes of the node to see if there is a constructor
+         * Determine that the node type is a function, and that the node name is the same as the class name, which is the constructor
          */
         while (!(node instanceof TypeDeclaration)) {
-            if ((node instanceof MethodDeclaration) && (((MethodDeclaration) node).getName().toString().equals(className))) {
+            if ((node instanceof MethodDeclaration) && (((MethodDeclaration) node).getName().toString().contains(className))) {
                 return true;
             }
             node = node.getParent();
@@ -517,9 +514,9 @@ public class UseASTAnalysisClass {
     }
 
     public static void useASTToaddVoli(String filePath) {
-        //读取文件
-        //因为会出现在类前面有一大堆注释的情况
-        //ast计算行数的时候会从注释开始算
+        //read file
+        //Because it's going to have a bunch of comments in front of the class
+        //When the ast calculates the number of rows, it starts with the comment
         BufferedReader br = null;
         String read = "";
         int index = 1;
@@ -546,7 +543,7 @@ public class UseASTAnalysisClass {
         examplesIO.addVolatileDefine(index + 2, "volatile boolean flagFix = false;", filePath);
     }
 
-    //表示加锁行数
+    //sync line
     public static class LockLine {
         int firstLoc;
         int lastLoc;

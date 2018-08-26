@@ -21,7 +21,7 @@ import java.util.Set;
 public class AddLockAfterAcquireVariable {
     static String dirPath = ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName;
     static Set<String> variableSet = new HashSet<String>();
-    static String className = "";//类的名字，以后用来比较用
+    static String className = "";//The name of the class for later comparison purposes
     static List<RelevantVarLockLine> relevantVarLockLineList = new ArrayList<RelevantVarLockLine>();
 
     static Set numSet = new HashSet();
@@ -51,17 +51,17 @@ public class AddLockAfterAcquireVariable {
 
     public static void main(String[] args) {
 
-        /*//获取相关变量
+        /*
         AcquireVariableInSameLock acquireVariableInSameLock = new AcquireVariableInSameLock();
         Vector<String> v = acquireVariableInSameLock.getOneLockfieldVector();
         for (String s : v)
             variableSet.add(s);
 
-        //单例
+        //
         ExamplesIO examplesIO = ExamplesIO.getInstance();
-        //将项目从examples复制到exportExamples，并且修改当前dirPath路径
+
         dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples","exportExamples", dirPath);
-        //对目录下的每个文件，都执行一次lock
+
         File file = new File(dirPath);
         File[] fileArr = file.listFiles();
         for(File f : fileArr){
@@ -71,13 +71,13 @@ public class AddLockAfterAcquireVariable {
     }
 
     public static void lock(int firstLoc, int lastLoc, Set<String> relevantVariabSet, String lockName, String filePath) {
-        //得到关联变量
+        //get relevantVariabSet
         for (String s : relevantVariabSet)
             variableSet.add(s);
 
         MatchVariable matchVariable = new MatchVariable();
 
-//        InsertCode.insert(3, "import java.util.concurrent.locks.ReentrantLock;" + '\n', filePath);//原本是可重入锁的定义，现在可以删
+//        InsertCode.insert(3, "import java.util.concurrent.locks.ReentrantLock;" + '\n', filePath);
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -86,14 +86,14 @@ public class AddLockAfterAcquireVariable {
 
         cu.accept(new ASTVisitor() {
 
-            Set<String> names = new HashSet<String>();//存放实际使用的变量，不这样做会有System等变量干扰
+            Set<String> names = new HashSet<String>();//Store actual used variables. If you do not do this, variables like System will interfere
 
             public boolean visit(TypeDeclaration node) {
                 className = node.getName().toString();
                 return true;
             }
 
-            //定义变量
+            //defined variable
             public boolean visit(VariableDeclarationFragment node) {
                 SimpleName name = node.getName();
                 this.names.add(name.getIdentifier());
@@ -101,7 +101,7 @@ public class AddLockAfterAcquireVariable {
                 return true; // do not continue to avoid usage info
             }
 
-            //变量
+            //variable
             public boolean visit(SimpleName node) {
                 if (this.names.contains(node.getIdentifier())) {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
@@ -109,7 +109,7 @@ public class AddLockAfterAcquireVariable {
 
                     int nodeStart = cu.getLineNumber(node.getStartPosition());
 
-                    //不在原来的地方才要加锁
+                    //Lock them out of their original place
                     if (!(nodeStart >= firstLoc && nodeStart <= lastLoc)) {
                         for (String s : variableSet) {
                             if (s.equals(node.getIdentifier()))
@@ -121,7 +121,7 @@ public class AddLockAfterAcquireVariable {
                             matchVariable.addMatchSet(node);
                             matchVariable.setSameFatherNode(node.getParent());
                         } else {
-                            //如果有数据则需要往里面添加数据，对于相同的变量，后面的一个变量应该覆盖前面的，在此处使用改变父节点的方法
+                            //If we have data, we need to add data to it. For the same variable, the last variable should overwrite the previous one
                             if (matchVariable.getMatchSet().contains(node)) {
                                 matchVariable.setSameFatherNode(node.getParent());
                             } else {
@@ -130,18 +130,16 @@ public class AddLockAfterAcquireVariable {
                                 matchVariable.searchSame(node.getParent());
                             }
                         }
+
+                        //The matched variables are contained in the associated variables
                         if (matchVariable.equalTarget(variableSet)) {
-//                           System.out.println("匹配成功");
-//                           System.out.println("开始" + cu.getLineNumber(matchVariable.getStartLine()));//下一行
-//                           System.out.println("结束" + cu.getLineNumber(matchVariable.getEndLine() + 1));
+//                        if (matchVariable.containsIn(variableSet)) {
 
-                            //不能整个类加锁，变量不是在构造函数里
-
-
+                            //Cannot lock the entire class, the variable is not in the constructor
                             if (!(isMemberVariable(matchVariable)) && !(isConstruct(matchVariable.getSameFatherNode().getParent()))) {
                                 boolean already = false;
-                                //没有数据直接加锁
-                                //有数据需要判定一下
+                                //No data is locked directly
+                                //There is data to determine
                                 if (relevantVarLockLineList.size() != 0) {
                                     for (RelevantVarLockLine rvl : relevantVarLockLineList) {
                                         if (rvl.startLine == cu.getLineNumber(matchVariable.getStartLine()) &&
@@ -161,12 +159,12 @@ public class AddLockAfterAcquireVariable {
                                         end = Math.max(cu.getLineNumber(nn.getStartPosition() + nn.getLength()), end);
                                     }
 
-                                    //判断加锁会不会和for循环等交叉
+                                    //Determine if the lock will cross the for loop, etc
                                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(start, end, filePath);
                                     start = lockLine.getFirstLoc();
                                     end = lockLine.getLastLoc();
 
-                                    //检查会不会定义变量在锁内，使用变量在锁外
+                                    //Will the variable be defined inside the lock and used outside
                                     lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(start, end, filePath);
                                     start = lockLine.getFirstLoc();
                                     end = lockLine.getLastLoc();
@@ -176,18 +174,18 @@ public class AddLockAfterAcquireVariable {
 
                                     if (!(start >= firstLoc && start <= lastLoc) || (end >= firstLoc && end <= lastLoc)) {
                                         if (numSet.contains(start) && numSet.contains(end)) {
-                                            //新加的锁包含在已加的锁里，直接不加
+                                            //The newly added lock is contained in the added lock, directly unadded
                                         } else if (numSet.contains(start) && !numSet.contains(end)) {
-                                            //新加的锁与已加的锁交叉
+                                            //The new lock intersects the added lock
                                             merge1(start, end, lockName, filePath);
                                         } else if (!numSet.contains(start) && numSet.contains(end)) {
                                             merge2(start, end, lockName, filePath);
                                         } else {
-                                            //加锁
+                                            //add sync
                                             InsertCode.insert(start, "synchronized (" + lockName + "){ ", filePath);
                                             InsertCode.insert(end, " }", filePath);
 
-                                            //将数据放到list里面
+                                            //put data into list
                                             RelevantVarLockLine r = new RelevantVarLockLine(start, end);
                                             relevantVarLockLineList.add(r);
                                         }
@@ -199,7 +197,8 @@ public class AddLockAfterAcquireVariable {
 
 
                             }
-                            //清空
+
+                            //clear out
                             matchVariable.clear();
                         }
                     }
@@ -221,7 +220,7 @@ public class AddLockAfterAcquireVariable {
         }
 
         for (int i = list.size() - 1; i >= 0; i--) {
-            //找到与其重合的
+            //Find the overlap
             if (!flagSearch) {
                 now = list.get(i);
                 if (now >= start && now <= (end + 1)) {
@@ -238,7 +237,7 @@ public class AddLockAfterAcquireVariable {
             }
         }
 
-        //只有一个
+        //only one
         if (oldStart == 0)
             oldStart = now;
 
@@ -254,7 +253,7 @@ public class AddLockAfterAcquireVariable {
         boolean flagSearch = false;
         int now = 0, next = 0;
         for (Object o : numSet) {
-            //找到与其重合的
+            //find overlap
             if (!flagSearch) {
                 now = (int) o;
                 if (now >= start && now <= (end + 1)) {
@@ -271,7 +270,7 @@ public class AddLockAfterAcquireVariable {
             }
         }
 
-        //oldStart是最后一个元素
+        //oldStart is the last element
         if (oldEnd == 0)
             oldEnd = now;
 
@@ -281,23 +280,24 @@ public class AddLockAfterAcquireVariable {
         MergePro.merge(start, end, oldStart, oldEnd, lockName, filePath);
     }
 
-    //检测是不是成员变量
+    //isMemberVariable
     private static boolean isMemberVariable(MatchVariable matchVariable) {
 
 
-        //是类的类型
-        if (matchVariable.getSameFatherNode().getParent() instanceof TypeDeclaration) {
+        //class type
+        if (matchVariable.getSameFatherNode().getParent() instanceof TypeDeclaration ||
+                matchVariable.getSameFatherNode().getParent().getParent() instanceof TypeDeclaration) {
             return true;
         }
         return false;
     }
 
-    //检测是不是构造函数里的变量
+    //is in Construct
     private static boolean isConstruct(ASTNode parent) {
 
         /**
-         * 检查结点的所有父节点，看看有没有一个是构造函数
-         * 判断节点类型是函数，节点名字与类名相同，则是构造函数
+         * Check all the parent nodes of the node to see if there is a constructor
+         * Determine that the node type is a function, and that the node name is the same as the class name, which is the constructor
          */
         while (!(parent instanceof TypeDeclaration)) {
             if ((parent instanceof MethodDeclaration) && (((MethodDeclaration) parent).getName().toString().equals(className))) {

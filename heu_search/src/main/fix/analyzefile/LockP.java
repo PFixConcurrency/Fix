@@ -3,7 +3,6 @@ package fix.analyzefile;
 import fix.entity.ImportPath;
 import fix.entity.LockNodeAndNum;
 import fix.entity.LockPObject;
-import fix.run.Fix;
 import fix.run.FixRefactor;
 import p_heu.entity.LockNode;
 import p_heu.entity.Node;
@@ -11,7 +10,6 @@ import p_heu.entity.ReadWriteNode;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
 
 public class LockP {
 
@@ -140,7 +138,7 @@ public class LockP {
 
 //        System.out.println(ln + ":" + max);
 
-        //得到lockP
+        //get lockp
         String lockName = "";
         if (ln == null) {
             LockPObject.element = "null";
@@ -292,7 +290,7 @@ public class LockP {
         deleteTempFile(tempFile);//删除临时文件
     }
 
-    //原文件修改后写入临时文件
+    //The original file is modified and then written to the temporary file
     private static void FileToTempFile(String filePath, String tempFile, int startLockLine, int endLockLine) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -328,7 +326,7 @@ public class LockP {
         }
     }
 
-    //从临时文件将修改后的内容再写入原文件
+    //Writes the modified content from the temporary file to the original file
     private static void TempFileToFile(String filePath, String tempFile) {
         BufferedReader br = null;
         BufferedWriter bw = null;
@@ -355,7 +353,7 @@ public class LockP {
         }
     }
 
-    //删除临时文件
+    //Delete temporary file
     private static void deleteTempFile(String tempFile) {
         File file = new File(tempFile);
         file.delete();

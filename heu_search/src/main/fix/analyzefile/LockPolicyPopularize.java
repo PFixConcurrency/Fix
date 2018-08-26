@@ -12,56 +12,54 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-//加锁策略的推广
-//就是关联变量加同步
+//add sync to relevent variable
 public class LockPolicyPopularize {
     public static Set<String> relevantVariableSet = new HashSet<String>();
     public static int firstLoc = 0;
     public static int lastLoc = 0;
     public static String variableName = "";
     public static String lockName = "";
-    public static boolean flagCross = false;//代表是否合并
+    public static boolean flagCross = false;//whether merge
 
 
     public static void fixRelevantVar(String filePath) {
-        //获取到关联变量
+
 //        if (!(lockName.equals("this") || lockName.equals("objectFix"))) {
 //            return;
 //        }
 
-//        acquireRekevantVar(firstLoc, lastLoc, filePath);
+        //acquire them
+        acquireRekevantVar(firstLoc, lastLoc, filePath);
 
-        /*System.out.println("关联变量");
-        for (String s : relevantVariableSet) {
-            System.out.println(s);
-        }
-        System.exit(-1);*/
+//        for (String s : relevantVariableSet) {
+//            System.out.println(s + "^");
+//        }
+//        System.exit(-1);
         if (relevantVariableSet.size() > 1) {
-            //对相关变量加锁
-            //set中大于等于两个变量才有加锁的意义
-            //不然加锁没意义
+            //add sync to related variables
+            //Two variables greater than or equal to the set need to be locked
             AddLockAfterAcquireVariable.lock(firstLoc, lastLoc, relevantVariableSet, lockName, filePath);
         }
     }
 
     private static Set<String> acquireRekevantVar(int firstLoc, int lastLoc, String threadName, String className) {
-        //存放关联变量
+        //store relevent
         Set<String> relevantVariableSet = new HashSet<String>();
-        //拿到sequence序列
+        //get sequence
         List<ReadWriteNode> nodeSequenceList = RecordSequence.getReadWriteNodeList();
-        //根据起始和终止位置，加上线程名，找出加的锁中的所有共享变量
-        //很显然是在原来的sequence序列中找
+        //Finds all Shared variables in the added lock, based on the start and end locations, plus the thread name
+        //It's obviously in the sequence
         for (ReadWriteNode node : nodeSequenceList) {
-            //首先得到行数
+            //get line number
             int poi = Integer.parseInt(node.getPosition().split(":")[1]);
-            //然后得到线程
+            //get thread
             String nodeThread = node.getThread();
-            //判断行数在不在这之间，是不是同一个线程
-            //考虑线程是因为有可能会有其他线程在这里操作
-            //还有考虑是不是同一个java文件，之前就因为没考虑这个而出错
+            //If the number of rows is between here and here, is the same thread
+            //Consider threads because it is possible that other threads will operate here
+            //Also consider whether it's the same Java file
             String nowCLassName = node.getPosition().split(":")[0].split("/")[1];
             if (poi >= firstLoc && poi <= lastLoc && nodeThread.equals(threadName) && nowCLassName.equals(className)) {
-//                System.out.println(node + "只是测试");
+
                 relevantVariableSet.add(node.getField());
             } else {
                 continue;
@@ -70,7 +68,7 @@ public class LockPolicyPopularize {
         return relevantVariableSet;
     }
 
-    //最后决定使用AST检查有哪些变量是关联变量，不用jpf
+    //Finally, decide to use the AST to check which variables are relevent
     private static void acquireRekevantVar(int firstLoc, int lastLoc, String filePath) {
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -81,10 +79,10 @@ public class LockPolicyPopularize {
         cu.accept(new ASTVisitor() {
 
 
-            //在锁中，有哪些变量被定义了
-            //后来仔细想想，关联变量肯定是编译后的
-            //以前会出现这样的情况，data.value算两个变量，
-            //现在我们只记录一个data
+            //In the lock, what are the variables are defined
+            //On second thought, the associated variable must be compiled
+            //It used to be like this, data.value is two variables,
+            //Now we're just recording one data
             Set<String> varDefInSync = new HashSet<String>();
 
             @Override
@@ -98,7 +96,9 @@ public class LockPolicyPopularize {
 
                 if (this.varDefInSync.contains(node.getIdentifier())) {
                     if (cu.getLineNumber(node.getStartPosition()) >= firstLoc && cu.getLineNumber(node.getStartPosition() + node.getLength()) <= lastLoc) {
-                        relevantVariableSet.add(node.getIdentifier());
+                        if (!node.getIdentifier().equals("objectFix")) {
+                            relevantVariableSet.add(node.getIdentifier());
+                        }
                     }
                 }
                 return super.visit(node);

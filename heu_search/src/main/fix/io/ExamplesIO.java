@@ -4,7 +4,7 @@ import java.io.*;
 
 public class ExamplesIO {
 
-    //单例模式
+    //singleton
     private static ExamplesIO examplesIO = new ExamplesIO();
 
     private ExamplesIO() {
@@ -14,40 +14,40 @@ public class ExamplesIO {
         return examplesIO;
     }
 
-    //添加静态变量
+    //Add static variables
     public void addStaticObject(int line, String objectName, String filePath){
         String context = "static Object " + objectName + " = new Object();";
         InsertCode.insert(line, context, filePath);
     }
 
-    //对一个变量加锁
+    //add sync to a variable
     public void addLockToOneVar(int startLine, int endLine, String lockName, String filePath) {
         InsertCode.insert(startLine, "synchronized (" + lockName + "){ ", filePath);
         InsertCode.insert(endLine, "}", filePath);
     }
 
-    //添加信号量的定义
+    //Add signal definition
     public void addVolatileDefine(int line, String volatileName, String filePath) {
         InsertCode.insert(line, volatileName, filePath);
     }
 
-    //添加信号量为true
+    //Add signal to true
     public void addVolatileToTrue(int line, String filePath) {
         InsertCode.insert(line, "flagFix = true;", filePath);
     }
 
-    //添加信号量判断
+    //Add signal judgment
     public void addVolatileIf(int line, String filePath) {
         InsertCode.insert(line, "while(!flagFix);", filePath);
     }
 
-    //将文件拷贝到另一个位置，并且修改path值
-    //将源程序拷贝到另一个工程目录下
+    //Copy the file to another location and change the path value
+    //Copy the source program to another project directory
     public String copyFromOneDirToAnotherAndChangeFilePath(String dir, String targetDir, String dirPath) {
         String changeFilePath = "";
         File file = new File(dirPath);
 //        File[] fileArr = file.listFiles();
-        //先创建一个copy目录
+        //Start by creating a copy directory
         changeFilePath = dirPath.replaceAll(dir, targetDir);
         File target = createDirectory(changeFilePath);
 
@@ -69,7 +69,7 @@ public class ExamplesIO {
             for (String file : files) {
                 File srcFile = new File(src, file);
                 File destFile = new File(dest, file);
-                // 递归复制
+                // recursive copy
                 copyFolder(srcFile, destFile);
             }
         } else {

@@ -24,7 +24,7 @@ public class Main {
         Tools.getContainMethod(classpath, mainClass, classNameOne, classLineOne);
         CallSite left = Tools.containMethod;
         String left_sign = Tools.containMethod.getSignature();
-        //跨类搜索，记录方法名称
+
         GlobalStaticObject.leftMethodName = left_sign.substring(0, left_sign.indexOf("(")).substring(left_sign.indexOf(" ") + 1);
         Tools.getContainMethod(classpath, mainClass, classNameTwo, classLineTwo);
         CallSite right = Tools.containMethod;

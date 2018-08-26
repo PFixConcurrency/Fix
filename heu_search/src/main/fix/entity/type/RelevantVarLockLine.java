@@ -1,7 +1,6 @@
 package fix.entity.type;
 
-//已经为关联变量添加的锁
-//这个类的使用是为了防止出现
+//To prevent
 //synchronized (objectFix){ synchronized (objectFix){     	 a = a + b;
 // } }    }
 public class RelevantVarLockLine {

@@ -1,6 +1,6 @@
 package fix.entity;
 /**
- * 这是一个用来完成匹配相关变量的类
+ * This is a class for matching related variables
  */
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -9,12 +9,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MatchVariable {
-    private Set<ASTNode> matchSet = new HashSet<ASTNode>();//存放访问的变量用来匹配
+    private Set<ASTNode> matchSet = new HashSet<ASTNode>();//Store the accessed variables to match
     private int startLine;
     private int endLine;
     private int lockNum = 0;
 
-    private ASTNode sameFatherNode = null;//代表父节点
+    private ASTNode sameFatherNode = null;//father node
 
     public Set<ASTNode> getMatchSet() {
         return matchSet;
@@ -38,25 +38,25 @@ public class MatchVariable {
     public void setSameFatherNode(ASTNode sameFatherNode) {
         this.sameFatherNode = sameFatherNode;
     }
-    //往Set里面添加元素
+    //add node to set
     public void addMatchSet(ASTNode node){
         this.matchSet.add(node);
     }
 
-    //判断macthSet是否有元素
+    //is empty
     public boolean matchSetIsEmpty(){
         return this.matchSet.isEmpty();
     }
 
-    //清空
+    //clear out
     public void clear(){
         this.matchSet.clear();
         this.sameFatherNode = null;
     }
 
-    //匹配
+    //match
     public boolean equalTarget(Set<String> target){
-        if(this.matchSet.size() != target.size())
+        if(this.matchSet.size() > target.size())
             return false;
 
         return true;
@@ -66,12 +66,12 @@ public class MatchVariable {
         lockNum++;
     }
 
-    //寻找两个ASTnode不同节点相同的父节点
+    //Look for two different astnodes with the same parent
     public void searchSame(ASTNode node){
         if(this.sameFatherNode.equals(node))
             return ;
         else{
-            ASTNode saveNode = this.sameFatherNode;//用来操作的node
+            ASTNode saveNode = this.sameFatherNode;//Node for manipulation
             ASTNode startNode = saveNode;
             ASTNode endNode = node;
             for(ASTNode iNode = saveNode; iNode != null; iNode = iNode.getParent()){
@@ -87,5 +87,20 @@ public class MatchVariable {
                 startNode = iNode;
             }
         }
+    }
+
+    public boolean containsIn(Set<String> variableSet) {
+
+        for (ASTNode matchSetNode : matchSet){
+            String match = matchSetNode.toString();
+            System.out.println(match+"=====");
+            for (String s : variableSet){
+//                if(!match.equals(s))
+//                    return false;
+                System.out.println(s);
+            }
+
+        }
+        return true;
     }
 }

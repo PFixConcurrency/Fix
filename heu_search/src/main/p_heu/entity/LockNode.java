@@ -2,7 +2,7 @@ package p_heu.entity;
 
 import java.util.HashMap;
 
-//¼ÇÂ¼syncĞÅÏ¢
+//reorder sync
 public class LockNode  extends Node {
     private String thread;
     private String lockElement;

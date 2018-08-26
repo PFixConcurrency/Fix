@@ -16,7 +16,7 @@ public class Sequence {
 	private Set<Pattern> patterns;
 	private Set<Sequence> correctSeqs;
 
-	//distance的值是否过期
+	//Whether the value of distance is expired
 	private boolean consist;
 	private boolean matched;
 	
@@ -178,7 +178,7 @@ public class Sequence {
         return this.distance;
     }
 
-    //当correctSeqs发生变动时，需要调用，使distance保持更新
+    //When correctSeqs changes, it needs to be called to keep distance updated
     public void distanceNeedUpdate() {
 	    this.consist = false;
     }
@@ -268,16 +268,16 @@ public class Sequence {
     }
 
     private MemoryAccessPair isMatch(ReadWriteNode node1, ReadWriteNode node2, MemoryAccessPair[] pairs) {
-	    //是否是同一个变量已经在上一个函数检查，这里不需要
+	    //If the same variable is already checked in the previous function, it is not needed here
 
 	    for (MemoryAccessPair pair : pairs) {
-	        //检查线程是否与pair要求一致
+	        //Check that the thread is consistent with the pair requirement
             PatternTypeNode[] ptNode = pair.getPatternType().getNodes();
 	        if (node1.getThread().equals(node2.getThread()) != ptNode[0].getThread().equals(ptNode[1].getThread())) {
 	            continue;
             }
 
-            //检查读写种类是否一致
+            //Check that the read and write types are consistent
             if (node1.getType().equals(ptNode[0].getType()) && node2.getType().equals(ptNode[1].getType())) {
 	            return new MemoryAccessPair(pair.getPatternType(), new ReadWriteNode[] {
 	                    node1, node2

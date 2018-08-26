@@ -12,9 +12,9 @@ import java.util.Vector;
 
 
 public class LockListener extends PropertyListenerAdapter {
-    public Vector<LocKSequence> LockVector = new Vector<LocKSequence>();//存放遇到的所有锁。
-    private String filePath;//要输出的文件的地址
-    private String fieldName;//要寻找的参数名
+    public Vector<LocKSequence> LockVector = new Vector<LocKSequence>();
+    private String filePath;
+    private String fieldName;
     private Vector<String> oneLockfieldVector = new Vector<String>();
 
     public Vector<String> getOneLockfieldVector() {
@@ -28,7 +28,7 @@ public class LockListener extends PropertyListenerAdapter {
     }
 
 
-    public LockListener(String filePath, String fieldName) {//给定一个变量
+    public LockListener(String filePath, String fieldName) {
         super();
         this.filePath = filePath;
         this.fieldName = fieldName;
@@ -36,7 +36,6 @@ public class LockListener extends PropertyListenerAdapter {
 
     @Override
     public void objectLocked(VM vm, ThreadInfo currentThread, ElementInfo lockedObject) {
-//		System.out.println("输出加锁:" + lockedObject.toString() + "," + currentThread.getName());
         LocKSequence locKSequence = new LocKSequence(lockedObject.toString(),currentThread.getName());
         LockVector.add(locKSequence);
 
@@ -44,7 +43,6 @@ public class LockListener extends PropertyListenerAdapter {
 
     @Override
     public void searchStarted(Search search) {
-        //每次启动前，检查是否有上次的文件残留
         File f = new File(filePath);
         if(f.exists())
             f.delete();
@@ -57,33 +55,32 @@ public class LockListener extends PropertyListenerAdapter {
 
     @Override
     public void objectUnlocked(VM vm, ThreadInfo currentThread, ElementInfo unlockedObject) {
-//		System.out.println("输出释放锁:" + unlockedObject.toString() + "," + currentThread.getName());
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath,true)));//往file里面增加内容
-            for(int i = LockVector.size() - 1; i >= 0; i--){//从后往前找
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath,true)));
+            for(int i = LockVector.size() - 1; i >= 0; i--){
                 LocKSequence ls = LockVector.get(i);
-                //对应当前释放的锁
+
                 if(ls.lockName.equals(unlockedObject.toString())&& currentThread.getName().equals(ls.threadName)){
-                    //写入文件
+
                     bw.write(ls.lockName + "\t" + ls.threadName + "\n");
                     for(LockElement le : ls.sequence){
                         bw.write(le.toString() + "\n");
                     }
                     bw.write("-----------------\n");
 
-                    //返回变量名
+
                     if(ls.matchField(fieldName)){
                         Vector<String> v = ls.fieldOnSameLock();
                         for(String s : v){
                             if(!oneLockfieldVector.contains(s)){
-                                oneLockfieldVector.add(s);//去重加入
+                                oneLockfieldVector.add(s);
                             }
                         }
 
                     }
 
-                    //清空对应的sequence
+
 //					ls.sequence.clear();
                     break;
                 }
@@ -110,10 +107,9 @@ public class LockListener extends PropertyListenerAdapter {
             FieldInstruction fins = (FieldInstruction)executedInstruction;
             FieldInfo fi = fins.getFieldInfo();
             ElementInfo ei = fins.getElementInfo(currentThread);
-            for(int i = LockVector.size() - 1; i >= 0; i--){//从后往前找
+            for(int i = LockVector.size() - 1; i >= 0; i--){
                 LocKSequence ls = LockVector.get(i);
                 if(ls.lockName.equals(ei.toString()) && currentThread.getName().equals(ls.threadName)){
-//                    System.out.println("里面的是" + ei.toString() + "," + fi.getName() + "," + currentThread.getName() + "," + fins.getFileLocation());
                     ls.sequence.add(new LockElement(ei.toString(), fi.getName(), currentThread.getName(), fins.getFileLocation()));
                     break;
                 }
